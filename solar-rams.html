@@ -1,0 +1,2948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar Installation – Dynamic Risk Assessment</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --black: #0f0f0f;
+    --white: #ffffff;
+    --slate: #1e2a38;
+    --amber: #f59e0b;
+    --amber-light: #fef3c7;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --blue: #1d4ed8;
+    --blue-light: #dbeafe;
+    --grey-100: #f3f4f6;
+    --grey-200: #e5e7eb;
+    --grey-400: #9ca3af;
+    --grey-600: #4b5563;
+    --grey-800: #1f2937;
+    --radius: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--grey-100);
+    color: var(--grey-800);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--slate);
+    color: white;
+    padding: 0;
+  }
+
+  .header-top {
+    background: var(--amber);
+    padding: 6px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .header-body {
+    padding: 20px 20px 16px;
+  }
+
+  .header-body h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .header-body p {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .progress-fill {
+    height: 3px;
+    background: var(--amber);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+
+  /* SECTION */
+  .section {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .section.active { display: block; }
+
+  .section-header {
+    background: var(--slate);
+    color: white;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-num {
+    background: var(--amber);
+    color: var(--slate);
+    font-weight: 800;
+    font-size: 12px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .section-body {
+    padding: 18px;
+  }
+
+  /* FIELDS */
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--grey-800);
+    margin-bottom: 6px;
+  }
+
+  label .req {
+    color: var(--red);
+    margin-left: 2px;
+  }
+
+  label .hint {
+    font-weight: 400;
+    color: var(--grey-400);
+    font-size: 12px;
+    display: block;
+    margin-top: 1px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="email"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--grey-200);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--grey-800);
+    background: white;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.08);
+  }
+
+  textarea { min-height: 80px; resize: vertical; }
+
+  .prefilled {
+    background: var(--grey-100);
+    color: var(--grey-600);
+    border-style: dashed;
+    cursor: not-allowed;
+  }
+
+  .prefilled-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--blue-light);
+    color: var(--blue);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+  }
+
+  /* RADIO / CHECKBOX */
+  .radio-group, .check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .radio-group.inline, .check-group.inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .radio-item, .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .radio-item input, .check-item input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ALERTS */
+  .alert {
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .alert-red { background: var(--red-light); color: #7f1d1d; border-left: 3px solid var(--red); }
+  .alert-amber { background: var(--amber-light); color: #78350f; border-left: 3px solid var(--amber); }
+  .alert-green { background: var(--green-light); color: #14532d; border-left: 3px solid var(--green); }
+  .alert-blue { background: var(--blue-light); color: #1e3a8a; border-left: 3px solid var(--blue); }
+
+  /* WIND SPEED */
+  .wind-display {
+    background: var(--slate);
+    color: white;
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .wind-speed-val {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .wind-speed-unit {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  .wind-status {
+    margin-top: 10px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: inline-block;
+  }
+
+  .wind-safe { background: var(--green); }
+  .wind-danger { background: var(--red); }
+  .wind-loading { background: #475569; }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--grey-200);
+    margin: 16px 0;
+  }
+
+  /* BRANCH */
+  .branch {
+    display: none;
+    background: var(--grey-100);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px;
+    margin-top: 10px;
+  }
+
+  .branch.show { display: block; }
+
+  .branch-red {
+    border-left-color: var(--red);
+    background: var(--red-light);
+  }
+
+  /* ROOF BLOCKS */
+  .roof-block {
+    background: var(--grey-100);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--grey-200);
+  }
+
+  .roof-block-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--slate);
+    color: white;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-primary:hover { background: #263548; }
+
+  .btn-amber {
+    background: var(--amber);
+    color: var(--slate);
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-red {
+    background: var(--red);
+    color: white;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-green {
+    background: var(--green);
+    color: white;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn-back {
+    background: white;
+    color: var(--grey-600);
+    border: 1.5px solid var(--grey-200);
+    flex: 0 0 80px;
+    justify-content: center;
+  }
+
+  .btn-next {
+    background: var(--slate);
+    color: white;
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* LOCATION */
+  .location-display {
+    background: var(--grey-100);
+    border-radius: var(--radius);
+    padding: 12px;
+    font-size: 13px;
+    color: var(--grey-600);
+    margin-bottom: 10px;
+    border: 1.5px dashed var(--grey-200);
+  }
+
+  .location-display strong {
+    color: var(--grey-800);
+    display: block;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  /* PHOTO */
+  .photo-upload {
+    border: 2px dashed var(--grey-200);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--grey-100);
+    transition: border-color 0.15s;
+  }
+
+  .photo-upload:hover { border-color: var(--amber); }
+  .photo-upload input { display: none; }
+  .photo-upload .icon { font-size: 28px; margin-bottom: 6px; }
+  .photo-upload p { font-size: 12px; color: var(--grey-400); }
+  .photo-preview { max-width: 100%; border-radius: var(--radius); margin-top: 10px; display: none; }
+
+  /* SIGN OFF */
+  .operative-sign {
+    background: var(--grey-100);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+    border: 1px solid var(--grey-200);
+  }
+
+  .signature-pad {
+    border: 1.5px solid var(--grey-200);
+    border-radius: var(--radius);
+    background: white;
+    width: 100%;
+    height: 100px;
+    cursor: crosshair;
+    margin-top: 8px;
+    display: block;
+    touch-action: none;
+  }
+
+  .sig-block {
+    background: var(--grey-100);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--grey-200);
+  }
+
+  .sig-block.signed {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+
+  .sig-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+
+  .sig-declaration {
+    font-size: 12px;
+    color: var(--grey-600);
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+
+  .sig-status {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 6px;
+    color: var(--grey-400);
+  }
+
+  .sig-status.done { color: var(--green); }
+
+  /* STOPPED WORK */
+  #stopped-work-section {
+    display: none;
+  }
+
+  #stopped-work-section.show {
+    display: block;
+  }
+
+  .stopped-banner {
+    background: var(--red);
+    color: white;
+    padding: 20px;
+    border-radius: var(--radius);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .stopped-banner h2 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .stopped-banner p {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  /* STEP INDICATOR */
+  .step-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px 0;
+    overflow-x: auto;
+  }
+
+  .step-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+
+  .step-dot.done { background: var(--amber); }
+  .step-dot.current { background: white; }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    .two-col { grid-template-columns: 1fr; }
+    .wind-speed-val { font-size: 36px; }
+  }
+
+  /* TEMPERATURE */
+  .temp-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--grey-100);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+
+  .temp-val {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--slate);
+  }
+
+  .temp-label { font-size: 12px; color: var(--grey-400); }
+
+  .submit-section {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">Dynamic Risk Assessment &amp; Method Statement</div>
+  <div class="header-body">
+    <h1>Solar Installation RAMS</h1>
+    <p id="header-location">Detecting location…</p>
+  </div>
+  <div class="step-indicator" id="step-dots"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</header>
+
+<div class="container">
+
+  <!-- STOPPED WORK -->
+  <div id="stopped-work-section">
+    <div class="stopped-banner">
+      <div style="font-size:36px;margin-bottom:8px;">🛑</div>
+      <h2>Work Cannot Commence</h2>
+      <p id="stopped-reason-text">Conditions outside safe working limits.</p>
+    </div>
+    <div class="submit-section">
+      <div class="field">
+        <label>Reason work cannot proceed <span class="req">*</span></label>
+        <textarea id="stopped-detail" placeholder="Describe the conditions preventing safe work…"></textarea>
+      </div>
+      <div class="field">
+        <label>Who has been notified?</label>
+        <input type="text" id="stopped-notified" placeholder="Name and role of person notified">
+      </div>
+      <div class="field">
+        <label>Further action required</label>
+        <textarea id="stopped-action" placeholder="What needs to happen before work can resume?"></textarea>
+      </div>
+      <div class="field">
+        <label>Date / time of assessment</label>
+        <input type="text" id="stopped-datetime" class="prefilled" readonly>
+      </div>
+      <button class="btn btn-red" onclick="submitStopped()">Submit — Work Stopped Assessment</button>
+    </div>
+  </div>
+
+  <!-- SECTION 1: JOB DETAILS -->
+  <div class="section active" id="sec1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">Job Details</div>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label>Site Address <span class="req">*</span>
+          <span class="hint">Auto-detected — correct if needed</span>
+        </label>
+        <div class="location-display" id="location-display">
+          <strong id="loc-address">Detecting…</strong>
+          <span id="loc-postcode"></span>
+          <span id="loc-coords" style="font-size:11px;color:#9ca3af;display:block;margin-top:2px;"></span>
+        </div>
+        <input type="text" id="site-address" placeholder="Confirm or correct address">
+        <input type="text" id="site-postcode" placeholder="Postcode">
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Customer Name <span class="req">*</span></label>
+          <input type="text" id="customer-name">
+        </div>
+        <div class="field">
+          <label>Job Number <span class="req">*</span></label>
+          <input type="text" id="job-number">
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Start Date <span class="req">*</span></label>
+          <input type="date" id="start-date">
+        </div>
+        <div class="field">
+          <label>Expected End Date</label>
+          <input type="date" id="end-date">
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Arrival Time</label>
+          <input type="time" id="arrival-time">
+        </div>
+        <div class="field">
+          <label>Estimated Duration</label>
+          <input type="text" id="duration" class="prefilled" readonly placeholder="Auto-calculated from dates">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Supervisor Name <span class="req">*</span></label>
+        <input type="text" id="supervisor-name">
+      </div>
+
+      <div class="field">
+        <label>Number of Operatives on Site <span class="req">*</span>
+          <span class="hint">Maximum 6</span>
+        </label>
+        <select id="num-operatives">
+          <option value="">Select…</option>
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+        </select>
+      </div>
+
+      <div class="field" id="operative-names-field">
+        <label>Operative Names</label>
+        <div id="operative-name-inputs"></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-next" onclick="goTo(2)">Next: Site Environment →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: SITE ENVIRONMENT -->
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">Site Environment</div>
+    </div>
+    <div class="section-body">
+
+      <div class="alert alert-blue">
+        <span class="alert-icon">ℹ️</span>
+        <span>Sections marked <strong>Pre-filled</strong> have been completed from desktop research. Confirm on site and note any changes.</span>
+      </div>
+
+      <div class="field">
+        <label>Overhead power lines present? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="overhead" value="yes" onchange="branch('overhead','yes')"> Yes</label>
+          <label class="radio-item"><input type="radio" name="overhead" value="no" onchange="branch('overhead','no')"> No</label>
+          <label class="radio-item"><input type="radio" name="overhead" value="unknown" onchange="branch('overhead','unknown')"> Unknown</label>
+        </div>
+        <div class="branch" id="branch-overhead-yes">
+          <div class="field">
+            <label>Type of cable</label>
+            <div class="check-group">
+              <label class="check-item"><input type="checkbox"> Low voltage (LV)</label>
+              <label class="check-item"><input type="checkbox"> High voltage (HV)</label>
+              <label class="check-item"><input type="checkbox"> Telecoms / broadband</label>
+              <label class="check-item"><input type="checkbox"> Unknown</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Estimated distance from work area</label>
+            <input type="text" placeholder="e.g. 4m">
+          </div>
+          <div class="field">
+            <label>Has DNO been contacted?</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="dno"> Yes</label>
+              <label class="radio-item"><input type="radio" name="dno"> No</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Control measures in place</label>
+            <textarea placeholder="Describe exclusion zone, barriers, goalposts etc."></textarea>
+          </div>
+        </div>
+        <div class="branch branch-red" id="branch-overhead-unknown">
+          <div class="alert alert-red"><span class="alert-icon">⚠️</span><span>Overhead cable status must be confirmed before work at height begins.</span></div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Is the resident home during the works? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="resident-home" value="yes" onchange="branch('resident','yes')"> Yes</label>
+          <label class="radio-item"><input type="radio" name="resident-home" value="no" onchange="branch('resident','no')"> No</label>
+        </div>
+        <div class="branch" id="branch-resident-yes">
+          <div class="field">
+            <label>Children in the property?</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="children"> Yes</label>
+              <label class="radio-item"><input type="radio" name="children"> No</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Vulnerable occupants? (elderly, disabled, medical needs)</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="vulnerable"> Yes</label>
+              <label class="radio-item"><input type="radio" name="vulnerable"> No</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Pets / animals in property?</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="pets"> Yes</label>
+              <label class="radio-item"><input type="radio" name="pets"> No</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Controls implemented for occupants</label>
+            <textarea placeholder="e.g. resident advised to remain indoors during lifting, children kept away from exclusion zone…"></textarea>
+          </div>
+        </div>
+        <div class="branch" id="branch-resident-no">
+          <div class="two-col">
+            <div class="field">
+              <label>Property unoccupied from</label>
+              <input type="time">
+            </div>
+            <div class="field">
+              <label>Until</label>
+              <input type="time">
+            </div>
+          </div>
+          <div class="field">
+            <label>Emergency contact for resident</label>
+            <input type="text" placeholder="Name and phone number">
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Exclusion zone established around property? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="exclusion"> Yes</label>
+          <label class="radio-item"><input type="radio" name="exclusion"> No — not required</label>
+          <label class="radio-item"><input type="radio" name="exclusion"> No — required but not yet in place</label>
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>Exclusion zone description</label>
+          <input type="text" placeholder="e.g. Barrier tape 3m from building line, signage at gate">
+        </div>
+      </div>
+
+      <hr class="divider">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:4px;">Nearby Sensitive Locations</p>
+      <p style="font-size:12px;color:var(--grey-400);margin-bottom:12px;">Auto-detected from GPS — confirm and correct if needed.</p>
+
+      <div class="field">
+        <label>Nearest A&amp;E Hospital</label>
+        <input type="text" id="nearest-ae" placeholder="Detecting…">
+        <input type="text" id="nearest-ae-dist" placeholder="Distance" style="margin-top:6px;color:var(--grey-600);font-size:13px;">
+      </div>
+
+      <div class="field">
+        <label>School within approx. 200m?</label>
+        <input type="text" id="nearest-school" placeholder="Detecting…" style="margin-bottom:6px;">
+        <div id="school-controls" style="display:none;">
+          <textarea placeholder="Controls in place — e.g. debris netting, works paused during school run 08:30–09:00 and 15:00–15:30…"></textarea>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Care home within approx. 200m?</label>
+        <input type="text" id="nearest-carehome" placeholder="Detecting…" style="margin-bottom:6px;">
+        <div id="carehome-controls" style="display:none;">
+          <textarea placeholder="Controls in place…"></textarea>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Bus stop within 100m?</label>
+        <input type="text" id="nearest-busstop" placeholder="Detecting…" style="margin-bottom:6px;">
+        <div id="busstop-controls" style="display:none;">
+          <textarea placeholder="e.g. overhead falling objects barrier erected between scaffold and bus stop…"></textarea>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:12px;">Underground Services</p>
+
+      <div class="field">
+        <label>Gas services</label>
+        <input type="text" placeholder="Provider and entry point location">
+      </div>
+      <div class="field">
+        <label>Water services</label>
+        <input type="text" placeholder="Provider and stop cock location">
+      </div>
+      <div class="field">
+        <label>Electricity services</label>
+        <input type="text" placeholder="Provider and meter location">
+      </div>
+      <div class="field">
+        <label>Any other buried services noted?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="other-services"> Yes</label>
+          <label class="radio-item"><input type="radio" name="other-services"> No</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Nearest A&amp;E hospital</label>
+        <input type="text" id="nearest-ae" placeholder="Auto-detecting or enter manually…">
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(1)">←</button>
+        <button class="btn btn-next" onclick="goTo(3)">Next: Weather →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WEATHER -->
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Weather &amp; Site Conditions</div>
+    </div>
+    <div class="section-body">
+
+      <div class="wind-display">
+        <div class="wind-speed-val" id="wind-val">–</div>
+        <div class="wind-speed-unit">mph · Live reading via GPS</div>
+        <div class="wind-status wind-loading" id="wind-status">Fetching…</div>
+      </div>
+
+      <div id="wind-safe-block">
+        <div class="alert alert-green" id="wind-ok-alert" style="display:none;">
+          <span class="alert-icon">✅</span>
+          <span>Wind speed is within safe working limits (&lt;23 mph). Work at height may proceed subject to all other checks.</span>
+        </div>
+      </div>
+
+      <div id="wind-danger-block" style="display:none;">
+        <div class="alert alert-red">
+          <span class="alert-icon">🛑</span>
+          <span><strong>Wind speed exceeds 23 mph.</strong> Work at height must not commence. Complete the stopped work assessment below.</span>
+        </div>
+        <div class="field">
+          <label>Upload screenshot of wind reading <span class="req">*</span></label>
+          <div class="photo-upload" onclick="document.getElementById('wind-photo').click()">
+            <div class="icon">📷</div>
+            <p>Tap to upload photo of wind reading</p>
+            <input type="file" id="wind-photo" accept="image/*" onchange="previewPhoto(this,'wind-photo-preview')">
+            <img id="wind-photo-preview" class="photo-preview">
+          </div>
+        </div>
+        <button class="btn btn-red" style="margin-top:10px;" onclick="triggerWindStop()">Record — Work Stopped Due to Wind Speed</button>
+      </div>
+
+      <div id="weather-continue" style="display:none;">
+        <hr class="divider">
+
+        <div class="temp-display">
+          <div>
+            <div class="wind-speed-val" id="temp-val" style="font-size:28px;">–</div>
+            <div class="temp-label">°C · Live temperature</div>
+          </div>
+          <div style="font-size:11px;color:var(--grey-400);margin-left:auto;text-align:right;">
+            <div id="weather-desc">–</div>
+            <div id="weather-source" style="margin-top:2px;">Open-Meteo API</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Current conditions on site <span class="req">*</span></label>
+          <div class="check-group">
+            <label class="check-item"><input type="checkbox" name="weather-cond" value="dry"> Dry</label>
+            <label class="check-item"><input type="checkbox" name="weather-cond" value="light-rain"> Light rain</label>
+            <label class="check-item"><input type="checkbox" name="weather-cond" value="heavy-rain"> Heavy rain</label>
+            <label class="check-item"><input type="checkbox" name="weather-cond" value="frost"> Frost / ice</label>
+            <label class="check-item"><input type="checkbox" name="weather-cond" value="snow"> Snow</label>
+            <label class="check-item"><input type="checkbox" name="weather-cond" value="hot"> Hot / direct sun</label>
+            <label class="check-item"><input type="checkbox" name="weather-cond" value="overcast"> Overcast</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Are conditions suitable for roof work? <span class="req">*</span></label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="conditions-suitable" value="yes"> Yes</label>
+            <label class="radio-item"><input type="radio" name="conditions-suitable" value="no" onchange="showWeatherStop()"> No</label>
+          </div>
+          <div class="branch branch-red" id="branch-weather-no" style="display:none;">
+            <div class="alert alert-red"><span class="alert-icon">🛑</span><span>Work must be suspended. Complete the stopped work assessment.</span></div>
+            <button class="btn btn-red" style="margin-top:8px;" onclick="triggerWeatherStop()">Record — Work Stopped Due to Weather</button>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-back" onclick="goTo(2)">←</button>
+          <button class="btn btn-next" onclick="goTo(4)">Next: Work at Height →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 4: WORK AT HEIGHT -->
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Work at Height</div>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label>How many roof elevations will be worked on? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="elevations" value="1" onchange="buildRoofs(1)"> 1</label>
+          <label class="radio-item"><input type="radio" name="elevations" value="2" onchange="buildRoofs(2)"> 2</label>
+          <label class="radio-item"><input type="radio" name="elevations" value="3" onchange="buildRoofs(3)"> 3</label>
+          <label class="radio-item"><input type="radio" name="elevations" value="4" onchange="buildRoofs(4)"> 4</label>
+          <label class="radio-item"><input type="radio" name="elevations" value="5+" onchange="buildRoofs(5)"> More than 4</label>
+        </div>
+      </div>
+
+      <div id="roof-blocks"></div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Access method(s) to height <span class="req">*</span></label>
+        <div class="check-group">
+          <label class="check-item"><input type="checkbox" id="access-scaffold" onchange="toggleAccess()"> Scaffold</label>
+          <label class="check-item"><input type="checkbox" id="access-mewp" onchange="toggleAccess()"> MEWP (cherry picker / scissor lift)</label>
+          <label class="check-item"><input type="checkbox" id="access-ladder" onchange="toggleAccess()"> Standalone ladder (non-scaffold)</label>
+          <label class="check-item"><input type="checkbox" id="access-rooflad" onchange="toggleAccess()"> Roof ladder / cat ladder</label>
+        </div>
+      </div>
+
+      <div class="branch" id="branch-scaffold">
+        <p style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--slate);">SCAFFOLD DETAILS</p>
+        <div class="field">
+          <label>Scaffold inspected and safe to use?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="scaffold-safe"> Yes</label>
+            <label class="radio-item"><input type="radio" name="scaffold-safe"> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Handover certificate available?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="scaffold-cert"> Yes</label>
+            <label class="radio-item"><input type="radio" name="scaffold-cert"> No</label>
+            <label class="radio-item"><input type="radio" name="scaffold-cert"> N/A</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Date of last scaffold inspection</label>
+          <input type="date">
+        </div>
+        <div class="field">
+          <label>Edge protection adequate?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="edge-prot"> Yes</label>
+            <label class="radio-item"><input type="radio" name="edge-prot"> No — describe below</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Scaffold defects / additional controls</label>
+          <textarea placeholder="Note any defects or additional measures required…"></textarea>
+        </div>
+      </div>
+
+      <div class="branch" id="branch-mewp">
+        <p style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--slate);">MEWP DETAILS</p>
+        <div class="two-col">
+          <div class="field"><label>Make</label><input type="text"></div>
+          <div class="field"><label>Model</label><input type="text"></div>
+        </div>
+        <div class="field"><label>Serial / plant number</label><input type="text"></div>
+        <div class="two-col">
+          <div class="field"><label>Last LOLER inspection date</label><input type="date"></div>
+          <div class="field"><label>Last service date</label><input type="date"></div>
+        </div>
+        <div class="field"><label>Pre-use inspection completed today?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="mewp-preuse"> Yes</label>
+            <label class="radio-item"><input type="radio" name="mewp-preuse"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Trained MEWP operator name</label><input type="text"></div>
+      </div>
+
+      <div class="branch" id="branch-ladder">
+        <p style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--slate);">STANDALONE LADDER DETAILS</p>
+        <div class="field">
+          <label>Ladder type</label>
+          <select>
+            <option>Select…</option>
+            <option>Single ladder</option>
+            <option>Extension ladder</option>
+            <option>Step ladder</option>
+            <option>Combination ladder</option>
+          </select>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Make</label><input type="text"></div>
+          <div class="field"><label>Model / ref</label><input type="text"></div>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Date of last inspection</label><input type="date"></div>
+          <div class="field"><label>Inspected by</label><input type="text"></div>
+        </div>
+        <div class="field"><label>Any defects noted?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="ladder-defect" onchange="document.getElementById('ladder-defect-branch').classList.add('show')"> Yes</label>
+            <label class="radio-item"><input type="radio" name="ladder-defect" onchange="document.getElementById('ladder-defect-branch').classList.remove('show')"> No</label>
+          </div>
+          <div class="branch branch-red" id="ladder-defect-branch">
+            <div class="field"><label>Describe defect</label><textarea></textarea></div>
+            <div class="field"><label>Ladder taken out of service?</label>
+              <div class="radio-group inline">
+                <label class="radio-item"><input type="radio" name="ladder-oos"> Yes</label>
+                <label class="radio-item"><input type="radio" name="ladder-oos"> No</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Rescue Plan — Person Incapacitated on Roof <span class="req">*</span>
+          <span class="hint">How will an unresponsive or injured operative be recovered from the roof?</span>
+        </label>
+        <textarea id="rescue-plan" placeholder="Describe the rescue procedure: who leads the rescue, what equipment is available, how the person will be lowered or brought down, when 999 will be called, assembly point…" style="min-height:120px;"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Rescue equipment available on site?</label>
+        <div class="check-group">
+          <label class="check-item"><input type="checkbox"> First aid kit</label>
+          <label class="check-item"><input type="checkbox"> Rescue ladder</label>
+          <label class="check-item"><input type="checkbox"> Stretcher / casualty bag</label>
+          <label class="check-item"><input type="checkbox"> Emergency lowering device</label>
+          <label class="check-item"><input type="checkbox"> Defibrillator (AED)</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Designated rescue operative</label>
+        <input type="text" placeholder="Name of person responsible for leading rescue">
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(3)">←</button>
+        <button class="btn btn-next" onclick="goTo(5)">Next: Electrical →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ELECTRICAL -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Electrical Safety &amp; Isolation</div>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label>Existing electrical installation appears safe?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="elec-safe" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="elec-safe" value="no" onchange="document.getElementById('branch-elec-unsafe').classList.add('show')"> No</label>
+        </div>
+        <div class="branch branch-red" id="branch-elec-unsafe">
+          <div class="field"><label>Describe electrical concerns</label><textarea></textarea></div>
+          <div class="field"><label>Work suspended pending electrician review?</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="elec-sus"> Yes</label>
+              <label class="radio-item"><input type="radio" name="elec-sus"> No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Isolation arrangements confirmed?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="isolation"> Yes</label>
+          <label class="radio-item"><input type="radio" name="isolation"> No</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Lock-out / Tag-out equipment available?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="loto"> Yes</label>
+          <label class="radio-item"><input type="radio" name="loto"> No</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Any damaged electrical equipment identified?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="damaged-elec" value="yes" onchange="document.getElementById('branch-damaged-elec').classList.add('show')"> Yes</label>
+          <label class="radio-item"><input type="radio" name="damaged-elec" value="no" onchange="document.getElementById('branch-damaged-elec').classList.remove('show')"> No</label>
+        </div>
+        <div class="branch branch-red" id="branch-damaged-elec">
+          <div class="field"><label>Describe damaged equipment</label><textarea></textarea></div>
+          <div class="field"><label>Defective equipment isolated?</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="elec-isolated"> Yes</label>
+              <label class="radio-item"><input type="radio" name="elec-isolated"> No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:12px;">Solar Panel Isolation</p>
+
+      <div class="alert alert-amber">
+        <span class="alert-icon">⚡</span>
+        <span>Solar panels begin generating electricity as soon as they are exposed to light. Isolation must be confirmed <strong>before</strong> any connections are made.</span>
+      </div>
+
+      <div class="field">
+        <label>Solar panel isolation method confirmed?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="solar-iso"> Yes</label>
+          <label class="radio-item"><input type="radio" name="solar-iso"> No — not yet in place</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Isolation method used</label>
+        <div class="check-group">
+          <label class="check-item"><input type="checkbox"> Opaque panel blankets / covers</label>
+          <label class="check-item"><input type="checkbox"> DC isolator switch locked off</label>
+          <label class="check-item"><input type="checkbox"> Connector caps fitted</label>
+          <label class="check-item"><input type="checkbox"> String combiner isolated</label>
+          <label class="check-item"><input type="checkbox"> Other — describe below</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Additional isolation notes</label>
+        <textarea placeholder="Describe any additional isolation steps or non-standard arrangements…"></textarea>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(4)">←</button>
+        <button class="btn btn-next" onclick="goTo(6)">Next: Battery →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: BATTERY -->
+  <div class="section" id="sec6">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">Battery Installation</div>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label>Is battery installation included in this visit? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="battery-inc" value="yes" onchange="document.getElementById('battery-details').classList.add('show')"> Yes</label>
+          <label class="radio-item"><input type="radio" name="battery-inc" value="no" onchange="document.getElementById('battery-details').classList.remove('show')"> No — skip this section</label>
+        </div>
+      </div>
+
+      <div class="branch" id="battery-details">
+        <div class="two-col">
+          <div class="field"><label>Battery make</label><input type="text" placeholder="e.g. Tesla"></div>
+          <div class="field"><label>Battery model</label><input type="text" placeholder="e.g. Powerwall 3"></div>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Serial number</label><input type="text"></div>
+          <div class="field"><label>Manufacture date</label><input type="date"></div>
+        </div>
+        <div class="field"><label>Planned installation location</label><input type="text" placeholder="e.g. garage wall, utility room"></div>
+        <div class="field"><label>Battery storage location suitable?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="batt-loc"> Yes</label>
+            <label class="radio-item"><input type="radio" name="batt-loc" onchange="document.getElementById('batt-loc-no').classList.add('show')"> No</label>
+          </div>
+          <div class="branch branch-red" id="batt-loc-no">
+            <div class="field"><label>Why is the location unsuitable?</label><textarea></textarea></div>
+            <div class="field"><label>Alternative location identified?</label>
+              <div class="radio-group inline">
+                <label class="radio-item"><input type="radio" name="batt-alt"> Yes</label>
+                <label class="radio-item"><input type="radio" name="batt-alt"> No</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field"><label>Adequate ventilation available?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="batt-vent"> Yes</label>
+            <label class="radio-item"><input type="radio" name="batt-vent"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Area free from combustible materials?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="batt-comb"> Yes</label>
+            <label class="radio-item"><input type="radio" name="batt-comb"> No — describe controls</label>
+          </div>
+        </div>
+        <div class="field"><label>Emergency isolation accessible?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="batt-emiso"> Yes</label>
+            <label class="radio-item"><input type="radio" name="batt-emiso"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Additional battery installation notes</label><textarea></textarea></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(5)">←</button>
+        <button class="btn btn-next" onclick="goTo(7)">Next: Lightning Protection →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: LIGHTNING PROTECTION -->
+  <div class="section" id="sec7">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div class="section-title">Lightning Protection System</div>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label>Is a lightning protection system (LPS) being installed or does one already exist? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="lps" value="yes" onchange="document.getElementById('lps-details').classList.add('show')"> Yes</label>
+          <label class="radio-item"><input type="radio" name="lps" value="no" onchange="document.getElementById('lps-details').classList.remove('show')"> No — skip this section</label>
+        </div>
+      </div>
+
+      <div class="branch" id="lps-details">
+        <div class="field"><label>LPS type</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="lps-type"> New installation</label>
+            <label class="radio-item"><input type="radio" name="lps-type"> Existing system being modified</label>
+            <label class="radio-item"><input type="radio" name="lps-type"> Existing system — inspection only</label>
+          </div>
+        </div>
+        <div class="field"><label>Does the installation match the approved design?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="lps-design"> Yes</label>
+            <label class="radio-item"><input type="radio" name="lps-design"> No — deviation noted below</label>
+            <label class="radio-item"><input type="radio" name="lps-design"> Not yet checked</label>
+          </div>
+        </div>
+        <div class="field"><label>Has the required separation distance been maintained?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="lps-sep"> Yes</label>
+            <label class="radio-item"><input type="radio" name="lps-sep"> No</label>
+            <label class="radio-item"><input type="radio" name="lps-sep"> N/A</label>
+          </div>
+        </div>
+        <div class="field"><label>Has the LPS been damaged or altered?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="lps-damage"> Yes — describe below</label>
+            <label class="radio-item"><input type="radio" name="lps-damage"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Earthing and bonding connections intact?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="lps-earth"> Yes</label>
+            <label class="radio-item"><input type="radio" name="lps-earth"> No — describe below</label>
+            <label class="radio-item"><input type="radio" name="lps-earth"> Not yet confirmed</label>
+          </div>
+        </div>
+        <div class="field"><label>Is specialist advice required before proceeding?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="lps-spec"> Yes — work paused</label>
+            <label class="radio-item"><input type="radio" name="lps-spec"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>LPS notes / deviations / concerns</label><textarea></textarea></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(6)">←</button>
+        <button class="btn btn-next" onclick="goTo(8)">Next: Excavation →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8: EXCAVATION -->
+  <div class="section" id="sec8">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <div class="section-title">Shallow Excavation</div>
+    </div>
+    <div class="section-body">
+
+      <div class="field">
+        <label>Is shallow excavation required on this visit? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="excav" value="yes" onchange="document.getElementById('excav-details').classList.add('show')"> Yes</label>
+          <label class="radio-item"><input type="radio" name="excav" value="no" onchange="document.getElementById('excav-details').classList.remove('show')"> No — skip this section</label>
+        </div>
+      </div>
+
+      <div class="branch" id="excav-details">
+        <div class="alert alert-amber">
+          <span class="alert-icon">⚠️</span>
+          <span>CAT &amp; Genny must be used before any ground-breaking work begins. Confirm details below.</span>
+        </div>
+
+        <p style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:var(--slate);margin-bottom:10px;">CAT Scanner</p>
+        <div class="two-col">
+          <div class="field"><label>Make</label><input type="text"></div>
+          <div class="field"><label>Model</label><input type="text"></div>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Last calibration date</label><input type="date"></div>
+          <div class="field"><label>Calibrated by</label><input type="text"></div>
+        </div>
+        <div class="field"><label>CAT trained operator</label><input type="text" placeholder="Name of person operating the CAT"></div>
+        <div class="field"><label>CAT training certificate date</label><input type="date"></div>
+
+        <hr class="divider">
+
+        <p style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:var(--slate);margin-bottom:10px;">Signal Generator (Genny)</p>
+        <div class="two-col">
+          <div class="field"><label>Make</label><input type="text"></div>
+          <div class="field"><label>Model</label><input type="text"></div>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Last calibration date</label><input type="date"></div>
+          <div class="field"><label>Calibrated by</label><input type="text"></div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="field"><label>Ground conditions</label>
+          <select>
+            <option>Select…</option>
+            <option>Firm — dry soil</option>
+            <option>Soft — wet soil</option>
+            <option>Clay</option>
+            <option>Sandy / loose</option>
+            <option>Tarmac / concrete surface</option>
+            <option>Mixed / unknown</option>
+          </select>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Planned excavation depth</label><input type="text" placeholder="e.g. 400mm"></div>
+          <div class="field"><label>Excavation length</label><input type="text" placeholder="e.g. 5m cable run"></div>
+        </div>
+        <div class="field"><label>Spoil management</label><textarea placeholder="Where will excavated material be placed, stored and removed?"></textarea></div>
+        <div class="field"><label>Excavation area safe to proceed?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="excav-safe"> Yes</label>
+            <label class="radio-item"><input type="radio" name="excav-safe"> No — hold on works</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(7)">←</button>
+        <button class="btn btn-next" onclick="goTo(9)">Next: Manual Handling →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9: MANUAL HANDLING -->
+  <div class="section" id="sec9">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <div class="section-title">Manual Handling</div>
+    </div>
+    <div class="section-body">
+
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:12px;">General Manual Handling</p>
+
+      <div class="field"><label>Any individual lifts over 25kg?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="mh-25"> Yes</label>
+          <label class="radio-item"><input type="radio" name="mh-25"> No</label>
+        </div>
+      </div>
+      <div class="field"><label>Team lifting required for any items?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="mh-team"> Yes</label>
+          <label class="radio-item"><input type="radio" name="mh-team"> No</label>
+        </div>
+      </div>
+      <div class="field"><label>Materials stored safely on site?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="mh-store"> Yes</label>
+          <label class="radio-item"><input type="radio" name="mh-store"> No — describe below</label>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:12px;">Solar Panel Lifting to Roof Level</p>
+
+      <div class="alert alert-amber">
+        <span class="alert-icon">⚠️</span>
+        <span>Solar panels are large, awkward, and wind-sensitive. The lifting method must be planned, briefed, and confirmed before any panels are moved to roof level.</span>
+      </div>
+
+      <div class="field">
+        <label>Approximate weight of each solar panel (kg)</label>
+        <input type="number" placeholder="e.g. 22" min="0" max="100">
+      </div>
+
+      <div class="field">
+        <label>How will solar panels be lifted to roof level? <span class="req">*</span>
+          <span class="hint">Select the planned method. Confirm equipment has been inspected, is suitable for the load, and exclusion zones are in place.</span>
+        </label>
+        <div class="radio-group" id="panel-lift-method">
+          <label class="radio-item"><input type="radio" name="panel-lift" value="ginwheel" onchange="showPanelLiftBranch(this.value)"> Scaffold-mounted gin wheel and rope</label>
+          <label class="radio-item"><input type="radio" name="panel-lift" value="hoist-scaffold" onchange="showPanelLiftBranch(this.value)"> Scaffold-mounted material hoist</label>
+          <label class="radio-item"><input type="radio" name="panel-lift" value="hoist-electric" onchange="showPanelLiftBranch(this.value)"> Electric ladder / material hoist</label>
+          <label class="radio-item"><input type="radio" name="panel-lift" value="genie" onchange="showPanelLiftBranch(this.value)"> Genie material lift</label>
+          <label class="radio-item"><input type="radio" name="panel-lift" value="telehandler" onchange="showPanelLiftBranch(this.value)"> Telehandler / HIAB</label>
+          <label class="radio-item"><input type="radio" name="panel-lift" value="manual-scaffold" onchange="showPanelLiftBranch(this.value)"> Manual lift from scaffold platform</label>
+          <label class="radio-item"><input type="radio" name="panel-lift" value="other" onchange="showPanelLiftBranch(this.value)"> Other (specify below)</label>
+        </div>
+      </div>
+
+      <!-- GIN WHEEL BRANCH -->
+      <div class="branch" id="lift-branch-ginwheel">
+        <div class="field"><label>Gin wheel — last inspection date</label><input type="date"></div>
+        <div class="field"><label>Gin wheel — safe working load (SWL) confirmed suitable for panel weight?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="ginwheel-swl"> Yes</label>
+            <label class="radio-item"><input type="radio" name="ginwheel-swl"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Rope condition satisfactory?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="ginwheel-rope"> Yes</label>
+            <label class="radio-item"><input type="radio" name="ginwheel-rope"> No — taken out of service</label>
+          </div>
+        </div>
+        <div class="field"><label>Trained operative designated for gin wheel operation?</label><input type="text" placeholder="Name"></div>
+      </div>
+
+      <!-- SCAFFOLD HOIST BRANCH -->
+      <div class="branch" id="lift-branch-hoist-scaffold">
+        <div class="field"><label>Hoist make and model</label><input type="text"></div>
+        <div class="field"><label>Last LOLER inspection date</label><input type="date"></div>
+        <div class="field"><label>SWL confirmed suitable for panel weight?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="hoist-s-swl"> Yes</label>
+            <label class="radio-item"><input type="radio" name="hoist-s-swl"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Trained operator name</label><input type="text"></div>
+      </div>
+
+      <!-- ELECTRIC HOIST BRANCH -->
+      <div class="branch" id="lift-branch-hoist-electric">
+        <div class="field"><label>Hoist make and model</label><input type="text"></div>
+        <div class="field"><label>Last LOLER / service date</label><input type="date"></div>
+        <div class="field"><label>SWL confirmed suitable for panel weight?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="hoist-e-swl"> Yes</label>
+            <label class="radio-item"><input type="radio" name="hoist-e-swl"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Trained operator name</label><input type="text"></div>
+      </div>
+
+      <!-- GENIE BRANCH -->
+      <div class="branch" id="lift-branch-genie">
+        <div class="field"><label>Genie make and model</label><input type="text" placeholder="e.g. Genie AWP-30S"></div>
+        <div class="field"><label>Last LOLER inspection date</label><input type="date"></div>
+        <div class="field"><label>Last service date</label><input type="date"></div>
+        <div class="field"><label>SWL confirmed suitable for panel weight?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="genie-swl"> Yes</label>
+            <label class="radio-item"><input type="radio" name="genie-swl"> No</label>
+          </div>
+        </div>
+        <div class="field"><label>Trained operator name</label><input type="text"></div>
+      </div>
+
+      <!-- TELEHANDLER BRANCH -->
+      <div class="branch" id="lift-branch-telehandler">
+        <div class="field"><label>Telehandler / HIAB make and model</label><input type="text"></div>
+        <div class="field"><label>Last LOLER inspection date</label><input type="date"></div>
+        <div class="field"><label>Appointed person for lifting operations</label><input type="text" placeholder="Name and qualification"></div>
+        <div class="field"><label>Lift plan in place?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="tele-plan"> Yes</label>
+            <label class="radio-item"><input type="radio" name="tele-plan"> No — required before lift proceeds</label>
+          </div>
+        </div>
+        <div class="field"><label>Exclusion zone established below lift area?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="tele-zone"> Yes</label>
+            <label class="radio-item"><input type="radio" name="tele-zone"> No</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANUAL SCAFFOLD BRANCH -->
+      <div class="branch" id="lift-branch-manual-scaffold">
+        <div class="alert alert-amber" style="margin-bottom:10px;">
+          <span class="alert-icon">⚠️</span>
+          <span>Manual lifting of panels on scaffold platforms carries significant risk. Confirm controls below.</span>
+        </div>
+        <div class="field"><label>Maximum number of operatives involved in each panel lift</label>
+          <input type="number" min="1" max="6" placeholder="e.g. 2"></div>
+        <div class="field"><label>Is there adequate platform space for safe manual handling?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="manual-space"> Yes</label>
+            <label class="radio-item"><input type="radio" name="manual-space"> No — lifting method must be reconsidered</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- OTHER BRANCH -->
+      <div class="branch" id="lift-branch-other">
+        <div class="field"><label>Describe lifting method</label><textarea placeholder="Describe the method, equipment, inspection status and controls…"></textarea></div>
+      </div>
+
+      <!-- SHARED FOLLOW-ON QUESTIONS FOR ALL METHODS -->
+      <div id="lift-followon" style="display:none;">
+        <div class="field" style="margin-top:12px;">
+          <label>Is there a designated loading bay on the scaffold? <span class="req">*</span>
+            <span class="hint">Panels must not be passed over scaffold guardrails without a suitable loading area.</span>
+          </label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="loading-bay"> Yes — loading bay in place</label>
+            <label class="radio-item"><input type="radio" name="loading-bay"> No — panels will be passed over guardrail</label>
+            <label class="radio-item"><input type="radio" name="loading-bay"> Not applicable</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Has the lifting method been briefed to all operatives? <span class="req">*</span></label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="lift-briefed" value="yes"> Yes</label>
+            <label class="radio-item"><input type="radio" name="lift-briefed" value="no" onchange="document.getElementById('lift-nobriefing').classList.add('show')"> No</label>
+          </div>
+          <div class="branch branch-red" id="lift-nobriefing">
+            <div class="alert alert-red">
+              <span class="alert-icon">🛑</span>
+              <span>Work must not commence until the lifting operation has been planned and communicated to all personnel involved.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Exclusion zone below lifting area confirmed?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="lift-exclusion"> Yes</label>
+            <label class="radio-item"><input type="radio" name="lift-exclusion"> No — not required for this method</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:12px;">Battery Unit Handling</p>
+
+      <div class="field"><label>Approximate weight of battery unit (kg)</label>
+        <input type="number" placeholder="e.g. 125" min="0">
+      </div>
+      <div class="field"><label>How will the battery be moved into its installation location?</label>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="battery-move"> Manual carry by team (2+ persons)</label>
+          <label class="radio-item"><input type="radio" name="battery-move"> Sack truck / pump truck</label>
+          <label class="radio-item"><input type="radio" name="battery-move"> Pallet truck / forklift delivery</label>
+          <label class="radio-item"><input type="radio" name="battery-move"> Other — describe in notes</label>
+        </div>
+      </div>
+      <div class="field"><label>Access route to installation location clear and suitable?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="battery-route"> Yes</label>
+          <label class="radio-item"><input type="radio" name="battery-route"> No — describe obstruction below</label>
+        </div>
+      </div>
+      <div class="field"><label>Manual handling notes</label><textarea placeholder="Any specific concerns about panel or battery weights, awkward access, steps, narrow doors…"></textarea></div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(8)">←</button>
+        <button class="btn btn-next" onclick="goTo(10)">Next: Emergency Arrangements →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10: EMERGENCY -->
+  <div class="section" id="sec10">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">Emergency Arrangements</div>
+    </div>
+    <div class="section-body">
+
+      <div class="field"><label>First aid kit available on site?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="fa-kit"> Yes</label>
+          <label class="radio-item"><input type="radio" name="fa-kit"> No</label>
+        </div>
+      </div>
+      <div class="field"><label>Qualified first aider present?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="fa-person"> Yes</label>
+          <label class="radio-item"><input type="radio" name="fa-person"> No</label>
+        </div>
+      </div>
+      <div class="field"><label>First aider name and certificate expiry</label><input type="text" placeholder="Name — expires DD/MM/YYYY"></div>
+      <div class="field"><label>Fire extinguisher available?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="fire-ext"> Yes</label>
+          <label class="radio-item"><input type="radio" name="fire-ext"> No</label>
+        </div>
+      </div>
+      <div class="field"><label>Emergency contact details available to all operatives?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="em-contact"> Yes</label>
+          <label class="radio-item"><input type="radio" name="em-contact"> No</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Nearest A&amp;E hospital</label>
+        <input type="text" id="nearest-ae-2" placeholder="Auto-detecting or enter manually…">
+      </div>
+      <div class="field"><label>Assembly point</label><input type="text" placeholder="e.g. front garden gate / pavement outside No. 12"></div>
+      <div class="field">
+        <label>Rescue plan confirmed by supervisor?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="rescue-confirm"> Yes — rescue plan completed in Section 4</label>
+          <label class="radio-item"><input type="radio" name="rescue-confirm"> No — return to Section 4</label>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(9)">←</button>
+        <button class="btn btn-next" onclick="goTo(11)">Next: Dynamic Risk Assessment →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 11: DYNAMIC RA -->
+  <div class="section" id="sec11">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <div class="section-title">Dynamic Risk Assessment</div>
+    </div>
+    <div class="section-body">
+
+      <div class="alert alert-blue">
+        <span class="alert-icon">ℹ️</span>
+        <span>Record any hazards identified on site today that are <strong>not covered</strong> by the pre-populated RAMS.</span>
+      </div>
+
+      <div class="field">
+        <label>Have any new hazards been identified? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="new-hazard" value="yes" onchange="document.getElementById('new-hazard-branch').classList.add('show')"> Yes</label>
+          <label class="radio-item"><input type="radio" name="new-hazard" value="no" onchange="document.getElementById('new-hazard-branch').classList.remove('show')"> No</label>
+        </div>
+        <div class="branch" id="new-hazard-branch">
+          <div class="field"><label>Describe the hazard(s) identified</label><textarea placeholder="What is the hazard, who is at risk, how were they identified?"></textarea></div>
+          <div class="field"><label>Control measures implemented</label><textarea placeholder="What controls have been put in place to reduce the risk?"></textarea></div>
+          <div class="field"><label>Residual risk level</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="residual"> 🟢 Low</label>
+              <label class="radio-item"><input type="radio" name="residual"> 🟡 Medium</label>
+              <label class="radio-item"><input type="radio" name="residual"> 🔴 High</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Is the work safe to proceed? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="safe-proceed" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="safe-proceed" value="no" onchange="document.getElementById('work-stopped-branch').classList.add('show')"> No</label>
+        </div>
+        <div class="branch branch-red" id="work-stopped-branch">
+          <div class="field"><label>Reason work cannot proceed</label><textarea></textarea></div>
+          <div class="field"><label>Who has been informed?</label><input type="text"></div>
+          <div class="field"><label>Further action required</label><textarea></textarea></div>
+          <button class="btn btn-red" style="margin-top:8px;" onclick="triggerGeneralStop()">Submit — Work Stopped Assessment</button>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-back" onclick="goTo(10)">←</button>
+        <button class="btn btn-next" onclick="goTo(12)">Next: Sign Off →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 12: SIGN OFF -->
+  <div class="section" id="sec12">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <div class="section-title">Workforce Briefing &amp; Sign Off</div>
+    </div>
+    <div class="section-body">
+
+      <div class="alert alert-amber">
+        <span class="alert-icon">📋</span>
+        <span>Brief the team on today's risks and controls before starting work. Each operative must sign against their name before the form can be submitted.</span>
+      </div>
+
+      <div class="field">
+        <label>Operatives briefed on today's RAMS and dynamic risk assessment?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="briefed"> Yes</label>
+          <label class="radio-item"><input type="radio" name="briefed"> No</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Team photograph — Toolbox Talk Evidence
+          <span class="hint">Take a photo of the team together before work starts</span>
+        </label>
+        <div class="photo-upload" onclick="document.getElementById('team-photo').click()">
+          <div class="icon">📷</div>
+          <p>Tap to upload team photo</p>
+          <input type="file" id="team-photo" accept="image/*" onchange="previewPhoto(this,'team-photo-preview')">
+          <img id="team-photo-preview" class="photo-preview">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:6px;">Operative Declarations &amp; Signatures</p>
+      <p style="font-size:13px;color:var(--grey-600);margin-bottom:14px;">Each person below confirms they have been briefed on all hazards and control measures and agree to work in accordance with this RAMS.</p>
+
+      <div id="operative-signatures"></div>
+
+      <div class="alert alert-blue" id="sig-reminder" style="display:none;margin-top:12px;">
+        <span class="alert-icon">✍️</span>
+        <span>All operatives must sign before the assessment can be submitted. Return to Section 1 if operative names need updating.</span>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Supervisor Declaration</label>
+        <div class="alert alert-blue" style="margin-bottom:12px;">
+          <span class="alert-icon">✍️</span>
+          <span><em>"I confirm that I have completed this dynamic risk assessment, briefed the workforce on the hazards and control measures, and that all necessary controls are in place before work commences."</em></span>
+        </div>
+        <label class="check-item" style="font-weight:600;">
+          <input type="checkbox" id="supervisor-declaration">
+          I confirm the above declaration is true and accurate
+        </label>
+      </div>
+
+      <div class="field">
+        <label>Supervisor name (confirmation)</label>
+        <input type="text" id="supervisor-confirm-name">
+      </div>
+
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--grey-400);margin-bottom:6px;margin-top:16px;">Supervisor Signature</p>
+      <canvas class="signature-pad" id="sig-supervisor" width="600" height="100"></canvas>
+      <button class="btn btn-back" style="width:auto;margin-top:6px;font-size:12px;padding:6px 12px;" onclick="clearSig('sig-supervisor')">Clear</button>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>Date &amp; time of submission</label>
+        <input type="text" id="submission-datetime" class="prefilled" readonly>
+      </div>
+
+      <div class="field">
+        <label>GPS coordinates at time of submission</label>
+        <input type="text" id="submission-coords" class="prefilled" readonly>
+      </div>
+
+      <hr class="divider">
+
+      <button class="btn btn-green" onclick="submitRAMS()">✅ Submit Completed Assessment</button>
+
+      <div class="nav-buttons" style="margin-top:12px;">
+        <button class="btn btn-back" onclick="goTo(11)">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="section" id="sec-success">
+    <div class="section-body" style="text-align:center;padding:40px 20px;">
+      <div style="font-size:60px;margin-bottom:16px;">✅</div>
+      <h2 style="font-size:22px;font-weight:800;color:var(--slate);margin-bottom:8px;">Assessment Submitted</h2>
+      <p style="color:var(--grey-600);font-size:14px;margin-bottom:20px;">This assessment has been logged. A record has been saved.</p>
+      <div style="background:var(--grey-100);border-radius:var(--radius);padding:14px;text-align:left;font-size:13px;">
+        <div><strong>Reference:</strong> <span id="ref-number"></span></div>
+        <div style="margin-top:4px;"><strong>Submitted:</strong> <span id="success-datetime"></span></div>
+        <div style="margin-top:4px;"><strong>Location:</strong> <span id="success-location"></span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// STATE
+let currentSection = 1;
+let totalSections = 12;
+let gpsLat = null, gpsLng = null;
+let windSpeed = null;
+let currentAddress = '';
+let stoppedReason = '';
+
+// INIT
+document.addEventListener('DOMContentLoaded', () => {
+  setDateTime();
+  getLocation();
+  buildStepDots();
+  updateProgress();
+
+  // Operative name inputs
+  document.getElementById('num-operatives').addEventListener('change', function() {
+    buildOperativeInputs(parseInt(this.value));
+  });
+
+  // Auto-calculate duration from start/end dates
+  document.getElementById('start-date').addEventListener('change', calcDuration);
+  document.getElementById('end-date').addEventListener('change', calcDuration);
+});
+
+function calcDuration() {
+  const start = document.getElementById('start-date').value;
+  const end = document.getElementById('end-date').value;
+  if (!start || !end) return;
+  const startD = new Date(start);
+  const endD = new Date(end);
+  const diff = Math.round((endD - startD) / (1000 * 60 * 60 * 24));
+  if (diff < 0) {
+    document.getElementById('duration').value = 'Check dates — end before start';
+    return;
+  }
+  document.getElementById('duration').value = diff === 0 ? '1 day' : `${diff + 1} days`;
+}
+
+function getLocation() {
+  if (!navigator.geolocation) {
+    showManualLocationFallback('Location not supported by this browser');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    gpsLat = pos.coords.latitude;
+    gpsLng = pos.coords.longitude;
+    document.getElementById('loc-coords').textContent = `${gpsLat.toFixed(5)}, ${gpsLng.toFixed(5)}`;
+    document.getElementById('submission-coords').value = `${gpsLat.toFixed(5)}, ${gpsLng.toFixed(5)}`;
+    reverseGeocode(gpsLat, gpsLng);
+    fetchWeather(gpsLat, gpsLng);
+    fetchNearbyLocations(gpsLat, gpsLng);
+  }, (err) => {
+    showManualLocationFallback('Location access denied — enter address and postcode manually below');
+    showManualWeatherFallback();
+  }, { timeout: 10000 });
+}
+
+function showManualLocationFallback(msg) {
+  document.getElementById('header-location').textContent = msg;
+  document.getElementById('loc-address').textContent = msg;
+  document.getElementById('loc-postcode').textContent = '';
+}
+
+function showManualWeatherFallback() {
+  document.getElementById('wind-val').textContent = '?';
+  document.getElementById('wind-status').textContent = 'GPS unavailable — enter reading manually';
+  document.getElementById('wind-status').className = 'wind-status wind-loading';
+  // Show a manual wind entry
+  const manualBlock = document.createElement('div');
+  manualBlock.className = 'field';
+  manualBlock.style.marginTop = '12px';
+  manualBlock.innerHTML = `
+    <label>Enter wind speed manually (mph) <span class="req">*</span>
+      <span class="hint">Use a weather app and enter the reading here</span>
+    </label>
+    <input type="number" id="manual-wind" min="0" max="100" placeholder="e.g. 15"
+      oninput="applyManualWind(this.value)">
+  `;
+  document.getElementById('wind-safe-block').before(manualBlock);
+
+  // Also show manual weather display
+  document.getElementById('weather-continue').style.display = 'block';
+  document.getElementById('wind-ok-alert').style.display = 'none';
+  document.getElementById('temp-val').textContent = '–';
+  document.getElementById('weather-desc').textContent = 'Enter manually below';
+}
+
+function applyManualWind(val) {
+  const mph = parseInt(val);
+  if (isNaN(mph)) return;
+  windSpeed = mph;
+  document.getElementById('wind-val').textContent = mph;
+  if (mph >= 23) {
+    document.getElementById('wind-status').textContent = 'UNSAFE — ABOVE LIMIT';
+    document.getElementById('wind-status').className = 'wind-status wind-danger';
+    document.getElementById('wind-danger-block').style.display = 'block';
+    document.getElementById('wind-ok-alert').style.display = 'none';
+  } else {
+    document.getElementById('wind-status').textContent = `SAFE — BELOW 23 MPH LIMIT`;
+    document.getElementById('wind-status').className = 'wind-status wind-safe';
+    document.getElementById('wind-ok-alert').style.display = 'flex';
+    document.getElementById('wind-danger-block').style.display = 'none';
+  }
+}
+
+function setDateTime() {
+  const now = new Date();
+  const str = now.toLocaleString('en-GB');
+  const els = ['stopped-datetime','submission-datetime'];
+  els.forEach(id => { const el = document.getElementById(id); if(el) el.value = str; });
+}
+
+function reverseGeocode(lat, lng) {
+  fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+    .then(r => r.json())
+    .then(data => {
+      const addr = data.address;
+      const road = addr.road || addr.pedestrian || '';
+      const num = addr.house_number || '';
+      const city = addr.city || addr.town || addr.village || '';
+      const postcode = addr.postcode || '';
+      const display = `${num} ${road}, ${city}`.trim().replace(/^,|,$/g,'');
+      document.getElementById('loc-address').textContent = display;
+      document.getElementById('loc-postcode').textContent = postcode;
+      document.getElementById('site-address').value = display;
+      document.getElementById('site-postcode').value = postcode;
+      document.getElementById('header-location').textContent = `${display} ${postcode}`;
+      currentAddress = `${display} ${postcode}`;
+    })
+    .catch(() => {
+      document.getElementById('loc-address').textContent = 'Could not detect address';
+    });
+}
+
+function fetchWeather(lat, lng) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,wind_speed_10m,weather_code&wind_speed_unit=mph`;
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      const current = data.current;
+      windSpeed = Math.round(current.wind_speed_10m);
+      const temp = Math.round(current.temperature_2m);
+
+      document.getElementById('wind-val').textContent = windSpeed;
+      document.getElementById('temp-val').textContent = temp;
+
+      const weatherDesc = getWeatherDesc(current.weather_code);
+      document.getElementById('weather-desc').textContent = weatherDesc;
+
+      if (windSpeed >= 23) {
+        document.getElementById('wind-status').textContent = 'UNSAFE — ABOVE LIMIT';
+        document.getElementById('wind-status').className = 'wind-status wind-danger';
+        document.getElementById('wind-danger-block').style.display = 'block';
+        document.getElementById('weather-continue').style.display = 'none';
+        document.getElementById('wind-ok-alert').style.display = 'none';
+      } else {
+        document.getElementById('wind-status').textContent = `SAFE — BELOW 23 MPH LIMIT`;
+        document.getElementById('wind-status').className = 'wind-status wind-safe';
+        document.getElementById('wind-ok-alert').style.display = 'flex';
+        document.getElementById('weather-continue').style.display = 'block';
+        document.getElementById('wind-danger-block').style.display = 'none';
+      }
+    })
+    .catch(() => {
+      document.getElementById('wind-val').textContent = '?';
+      document.getElementById('wind-status').textContent = 'Could not fetch — enter manually';
+    });
+}
+
+function getWeatherDesc(code) {
+  const map = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Rain showers',81:'Heavy showers',82:'Violent showers',95:'Thunderstorm',99:'Thunderstorm with hail'};
+  return map[code] || 'Unknown';
+}
+
+// DISTANCE HELPER
+function distanceMetres(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+function distanceLabel(m) {
+  return m < 1000 ? `${m}m away` : `${(m/1000).toFixed(1)}km away`;
+}
+
+// FETCH ALL NEARBY LOCATIONS VIA OVERPASS
+function fetchNearbyLocations(lat, lng) {
+  // A&E — search within 10km
+  const aeQuery = `[out:json][timeout:10];
+    (node["amenity"="hospital"]["emergency"="yes"](around:10000,${lat},${lng});
+     way["amenity"="hospital"]["emergency"="yes"](around:10000,${lat},${lng}););
+    out center 1;`;
+
+  // Schools, care homes, bus stops — separate radii
+  const nearbyQuery = `[out:json][timeout:10];
+    (node["amenity"="school"](around:200,${lat},${lng});
+     way["amenity"="school"](around:200,${lat},${lng});
+     node["amenity"="care_home"](around:200,${lat},${lng});
+     way["amenity"="care_home"](around:200,${lat},${lng});
+     node["amenity"="nursing_home"](around:200,${lat},${lng});
+     node["highway"="bus_stop"](around:100,${lat},${lng}););
+    out center;`;
+
+  const overpass = 'https://overpass-api.de/api/interpreter';
+
+  // Fetch A&E
+  fetch(overpass, { method: 'POST', body: `data=${encodeURIComponent(aeQuery)}` })
+    .then(r => r.json())
+    .then(data => {
+      const el = data.elements[0];
+      if (el) {
+        const elLat = el.lat || el.center?.lat;
+        const elLon = el.lon || el.center?.lon;
+        const name = el.tags?.name || 'Hospital with A&E';
+        const dist = distanceMetres(lat, lng, elLat, elLon);
+        document.getElementById('nearest-ae').value = name;
+        document.getElementById('nearest-ae-dist').value = distanceLabel(dist);
+        // Mirror to section 10
+        const ae2 = document.getElementById('nearest-ae-2');
+        if (ae2) ae2.value = `${name} — ${distanceLabel(dist)}`;
+      } else {
+        document.getElementById('nearest-ae').value = 'Not found — enter manually';
+        document.getElementById('nearest-ae-dist').value = '';
+      }
+    })
+    .catch(() => {
+      document.getElementById('nearest-ae').value = 'Enter manually';
+      document.getElementById('nearest-ae-dist').value = '';
+    });
+
+  // Fetch nearby sensitive locations
+  fetch(overpass, { method: 'POST', body: `data=${encodeURIComponent(nearbyQuery)}` })
+    .then(r => r.json())
+    .then(data => {
+      const elements = data.elements || [];
+
+      // Schools
+      const schools = elements.filter(e => e.tags?.amenity === 'school');
+      const schoolEl = document.getElementById('nearest-school');
+      if (schools.length > 0) {
+        const s = schools[0];
+        const sLat = s.lat || s.center?.lat;
+        const sLon = s.lon || s.center?.lon;
+        const dist = distanceMetres(lat, lng, sLat, sLon);
+        const name = s.tags?.name || 'School';
+        schoolEl.value = `${name} — ${distanceLabel(dist)}`;
+        document.getElementById('school-controls').style.display = 'block';
+      } else {
+        schoolEl.value = 'None within 200m';
+        document.getElementById('school-controls').style.display = 'none';
+      }
+
+      // Care homes
+      const homes = elements.filter(e => ['care_home','nursing_home'].includes(e.tags?.amenity));
+      const homeEl = document.getElementById('nearest-carehome');
+      if (homes.length > 0) {
+        const h = homes[0];
+        const hLat = h.lat || h.center?.lat;
+        const hLon = h.lon || h.center?.lon;
+        const dist = distanceMetres(lat, lng, hLat, hLon);
+        const name = h.tags?.name || 'Care home';
+        homeEl.value = `${name} — ${distanceLabel(dist)}`;
+        document.getElementById('carehome-controls').style.display = 'block';
+      } else {
+        homeEl.value = 'None within 200m';
+        document.getElementById('carehome-controls').style.display = 'none';
+      }
+
+      // Bus stops
+      const stops = elements.filter(e => e.tags?.highway === 'bus_stop');
+      const stopEl = document.getElementById('nearest-busstop');
+      if (stops.length > 0) {
+        const b = stops[0];
+        const bLat = b.lat || b.center?.lat;
+        const bLon = b.lon || b.center?.lon;
+        const dist = distanceMetres(lat, lng, bLat, bLon);
+        const name = b.tags?.name || b.tags?.ref || 'Bus stop';
+        stopEl.value = `${name} — ${distanceLabel(dist)}`;
+        document.getElementById('busstop-controls').style.display = 'block';
+      } else {
+        stopEl.value = 'None within 100m';
+        document.getElementById('busstop-controls').style.display = 'none';
+      }
+    })
+    .catch(() => {
+      ['nearest-school','nearest-carehome','nearest-busstop'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = 'Enter manually';
+      });
+    });
+}
+
+// OPERATIVE INPUTS
+function buildOperativeInputs(num) {
+  const container = document.getElementById('operative-name-inputs');
+  container.innerHTML = '';
+  for (let i = 1; i <= num; i++) {
+    const d = document.createElement('div');
+    d.style.marginBottom = '8px';
+    d.innerHTML = `<input type="text" placeholder="Operative ${i} — full name" style="margin-bottom:0">`;
+    container.appendChild(d);
+  }
+}
+
+// ROOF BLOCKS
+function buildRoofs(num) {
+  const container = document.getElementById('roof-blocks');
+  container.innerHTML = '';
+  const locations = ['Front','Rear','Left side','Right side','Garage','Extension','Dormer','Other'];
+  const types = ['Pitched','Flat','Mono-pitch','Hipped','Mansard','Dormer','Complex/multi'];
+  const coverings = ['Concrete tiles','Clay tiles','Natural slate','Synthetic slate','Felt/EPDM (flat)','GRP fibreglass','Metal','Other'];
+
+  const count = num > 4 ? 4 : num;
+  for (let i = 1; i <= count; i++) {
+    const block = document.createElement('div');
+    block.className = 'roof-block';
+    block.innerHTML = `
+      <div class="roof-block-title">Roof ${i} Assessment</div>
+      <div class="field"><label>Roof location</label>
+        <select>${locations.map(l=>`<option>${l}</option>`).join('')}</select></div>
+      <div class="field"><label>Roof type</label>
+        <select>${types.map(t=>`<option>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Roof covering</label>
+        <select>${coverings.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Approximate roof pitch</label>
+        <select>
+          <option>Select…</option>
+          <option>Flat (0–10°)</option>
+          <option>Low pitch (10–20°)</option>
+          <option>Medium pitch (20–35°)</option>
+          <option>Steep (35–45°)</option>
+          <option>Very steep (45°+)</option>
+        </select></div>
+      <div class="field"><label>Roof condition suitable for access?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="roof${i}-cond"> Yes</label>
+          <label class="radio-item"><input type="radio" name="roof${i}-cond"> No</label>
+        </div></div>
+      <div class="field"><label>Fragile surfaces present?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="roof${i}-frag"> Yes</label>
+          <label class="radio-item"><input type="radio" name="roof${i}-frag"> No</label>
+        </div></div>
+      <div class="field"><label>Rooflights / skylights present?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="roof${i}-sky"> Yes</label>
+          <label class="radio-item"><input type="radio" name="roof${i}-sky"> No</label>
+        </div></div>
+      <div class="field"><label>Moss / algae present?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="roof${i}-moss"> Yes</label>
+          <label class="radio-item"><input type="radio" name="roof${i}-moss"> No</label>
+        </div></div>
+      <div class="field"><label>Loose or broken tiles / slates?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="roof${i}-tiles"> Yes</label>
+          <label class="radio-item"><input type="radio" name="roof${i}-tiles"> No</label>
+        </div></div>
+      <div class="field"><label>Safe access available?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="roof${i}-access"> Yes</label>
+          <label class="radio-item"><input type="radio" name="roof${i}-access"> No</label>
+        </div></div>
+      <div class="field"><label>Additional controls required</label>
+        <textarea placeholder="Note any specific controls for this elevation…"></textarea></div>
+    `;
+    container.appendChild(block);
+  }
+
+  if (num > 4) {
+    const extra = document.createElement('div');
+    extra.className = 'roof-block';
+    extra.innerHTML = `
+      <div class="roof-block-title">Additional Elevations (beyond 4)</div>
+      <div class="field"><label>Describe additional roof elevations and their conditions</label>
+        <textarea style="min-height:100px;" placeholder="Describe roof 5, 6 etc. — location, type, condition, controls…"></textarea></div>
+    `;
+    container.appendChild(extra);
+  }
+}
+
+// PANEL LIFT BRANCHING
+function showPanelLiftBranch(val) {
+  const branches = ['ginwheel','hoist-scaffold','hoist-electric','genie','telehandler','manual-scaffold','other'];
+  branches.forEach(b => {
+    const el = document.getElementById(`lift-branch-${b}`);
+    if (el) el.classList.remove('show');
+  });
+  const target = document.getElementById(`lift-branch-${val}`);
+  if (target) target.classList.add('show');
+  document.getElementById('lift-followon').style.display = 'block';
+}
+
+// ACCESS TOGGLE
+function toggleAccess() {
+  const scaffold = document.getElementById('access-scaffold').checked;
+  const mewp = document.getElementById('access-mewp').checked;
+  const ladder = document.getElementById('access-ladder').checked;
+
+  document.getElementById('branch-scaffold').classList.toggle('show', scaffold);
+  document.getElementById('branch-mewp').classList.toggle('show', mewp);
+  document.getElementById('branch-ladder').classList.toggle('show', ladder);
+}
+
+// BRANCH HELPER
+function branch(name, val) {
+  const allBranches = document.querySelectorAll(`[id^="branch-${name}"]`);
+  allBranches.forEach(b => b.classList.remove('show'));
+  const target = document.getElementById(`branch-${name}-${val}`);
+  if (target) target.classList.add('show');
+}
+
+// WEATHER STOP
+function showWeatherStop() {
+  document.getElementById('branch-weather-no').style.display = 'block';
+}
+
+// WIND STOP
+function triggerWindStop() {
+  stoppedReason = `Wind speed ${windSpeed} mph — exceeds 23 mph HSE limit`;
+  showStopped(stoppedReason);
+}
+
+function triggerWeatherStop() {
+  stoppedReason = 'Weather conditions unsuitable for roof work';
+  showStopped(stoppedReason);
+}
+
+function triggerGeneralStop() {
+  stoppedReason = 'Hazard identified — work cannot safely proceed';
+  showStopped(stoppedReason);
+}
+
+function showStopped(reason) {
+  // Hide all sections
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const stopped = document.getElementById('stopped-work-section');
+  stopped.classList.add('show');
+  document.getElementById('stopped-reason-text').textContent = reason;
+  document.getElementById('stopped-datetime').value = new Date().toLocaleString('en-GB');
+  window.scrollTo(0,0);
+}
+
+function submitStopped() {
+  const detail = document.getElementById('stopped-detail').value;
+  if (!detail.trim()) {
+    alert('Please describe the reason work cannot proceed.');
+    return;
+  }
+  showSuccess('STOPPED');
+}
+
+// PHOTO PREVIEW
+function previewPhoto(input, previewId) {
+  const preview = document.getElementById(previewId);
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// STEP DOTS
+function buildStepDots() {
+  const container = document.getElementById('step-dots');
+  for (let i = 1; i <= totalSections; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (i === 1 ? ' current' : '');
+    dot.id = `dot-${i}`;
+    container.appendChild(dot);
+  }
+}
+
+function updateProgress() {
+  const pct = ((currentSection - 1) / totalSections) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  for (let i = 1; i <= totalSections; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    if (!dot) continue;
+    if (i < currentSection) dot.className = 'step-dot done';
+    else if (i === currentSection) dot.className = 'step-dot current';
+    else dot.className = 'step-dot';
+  }
+}
+
+// SIGNATURE PADS
+const sigState = {}; // tracks which canvases have been signed
+
+function buildOperativeSignatures() {
+  const container = document.getElementById('operative-signatures');
+  container.innerHTML = '';
+  sigState.operatives = [];
+
+  const inputs = document.querySelectorAll('#operative-name-inputs input');
+  const names = Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
+
+  if (names.length === 0) {
+    container.innerHTML = '<div class="alert alert-amber"><span class="alert-icon">⚠️</span><span>No operative names entered. Return to Section 1 and add names before signing.</span></div>';
+    return;
+  }
+
+  names.forEach((name, idx) => {
+    const id = `sig-op-${idx}`;
+    sigState.operatives.push({ name, id, signed: false });
+
+    const block = document.createElement('div');
+    block.className = 'sig-block';
+    block.id = `sigblock-${idx}`;
+    block.innerHTML = `
+      <div class="sig-name">${name}</div>
+      <div class="sig-declaration">"I confirm I have been briefed on today's risks and control measures and agree to work in accordance with this RAMS and Dynamic Risk Assessment."</div>
+      <canvas class="signature-pad" id="${id}" width="600" height="100"></canvas>
+      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
+        <button class="btn btn-back" style="width:auto;font-size:12px;padding:6px 12px;" onclick="clearSig('${id}',${idx})">Clear</button>
+        <span class="sig-status" id="sigstatus-${idx}">Not yet signed</span>
+      </div>
+    `;
+    container.appendChild(block);
+
+    // Init canvas after it's in the DOM
+    setTimeout(() => initSigPad(id, idx), 50);
+  });
+}
+
+function initSigPad(canvasId, opIdx) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  // Set actual pixel size to match display size
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width || 600;
+  canvas.height = 100;
+
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#1e2a38';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  let drawing = false;
+  let hasMark = false;
+
+  const getPos = (e) => {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  };
+
+  const start = (e) => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+  const draw = (e) => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasMark = true; markSigned(canvasId, opIdx); };
+  const stop = (e) => { e.preventDefault(); drawing = false; };
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stop, { passive: false });
+}
+
+function initSupervisorSigPad() {
+  const canvas = document.getElementById('sig-supervisor');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width || 600;
+  canvas.height = 100;
+
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#1e2a38';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  let drawing = false;
+  const getPos = (e) => { const r = canvas.getBoundingClientRect(); const src = e.touches ? e.touches[0] : e; return { x: src.clientX - r.left, y: src.clientY - r.top }; };
+  const start = (e) => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); sigState.supervisorSigned = true; };
+  const draw = (e) => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+  const stop = (e) => { e.preventDefault(); drawing = false; };
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stop, { passive: false });
+}
+
+function markSigned(canvasId, opIdx) {
+  if (sigState.operatives[opIdx] && !sigState.operatives[opIdx].signed) {
+    sigState.operatives[opIdx].signed = true;
+    const block = document.getElementById(`sigblock-${opIdx}`);
+    if (block) block.classList.add('signed');
+    const status = document.getElementById(`sigstatus-${opIdx}`);
+    if (status) { status.textContent = '✓ Signed'; status.classList.add('done'); }
+  }
+}
+
+function clearSig(canvasId, opIdx) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (opIdx !== undefined && sigState.operatives[opIdx]) {
+    sigState.operatives[opIdx].signed = false;
+    const block = document.getElementById(`sigblock-${opIdx}`);
+    if (block) block.classList.remove('signed');
+    const status = document.getElementById(`sigstatus-${opIdx}`);
+    if (status) { status.textContent = 'Not yet signed'; status.classList.remove('done'); }
+  }
+  if (canvasId === 'sig-supervisor') sigState.supervisorSigned = false;
+}
+
+function allSigned() {
+  if (!sigState.operatives || sigState.operatives.length === 0) return false;
+  return sigState.operatives.every(op => op.signed);
+}
+
+// NAVIGATION
+function goTo(n) {
+  document.getElementById(`sec${currentSection}`).classList.remove('active');
+  currentSection = n;
+  document.getElementById(`sec${currentSection}`).classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
+
+  // Build signature blocks when reaching sign-off
+  if (n === 12) {
+    buildOperativeSignatures();
+    setTimeout(() => initSupervisorSigPad(), 100);
+  }
+}
+
+// SHEETDB API
+const SHEETDB_URL = 'https://sheetdb.io/api/v1/rtr81twntihqh';
+
+// COLLECT FORM DATA
+function collectFormData(type, ref) {
+  const getVal = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const getRadio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value || el.parentElement.textContent.trim() : ''; };
+  const getChecked = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value || el.parentElement.textContent.trim()).join(', ');
+
+  // Collect operative names
+  const opInputs = document.querySelectorAll('#operative-name-inputs input');
+  const operatives = Array.from(opInputs).map(i => i.value).filter(Boolean).join(', ');
+
+  // Collect weather conditions
+  const weatherConds = Array.from(document.querySelectorAll('input[name="weather-cond"]:checked')).map(el => el.value).join(', ');
+
+  // Collect access methods
+  const accessMethods = [];
+  if (document.getElementById('access-scaffold') && document.getElementById('access-scaffold').checked) accessMethods.push('Scaffold');
+  if (document.getElementById('access-mewp') && document.getElementById('access-mewp').checked) accessMethods.push('MEWP');
+  if (document.getElementById('access-ladder') && document.getElementById('access-ladder').checked) accessMethods.push('Standalone ladder');
+  if (document.getElementById('access-rooflad') && document.getElementById('access-rooflad').checked) accessMethods.push('Roof ladder');
+
+  return {
+    'Timestamp': new Date().toLocaleString('en-GB'),
+    'Reference': ref,
+    'Site Address': getVal('site-address'),
+    'Postcode': getVal('site-postcode'),
+    'GPS Coordinates': getVal('submission-coords'),
+    'Customer Name': getVal('customer-name'),
+    'Job Number': getVal('job-number'),
+    'Start Date': getVal('start-date'),
+    'End Date': getVal('end-date'),
+    'Duration': getVal('duration'),
+    'Supervisor Name': getVal('supervisor-name'),
+    'Operatives': operatives,
+    'Wind Speed (mph)': document.getElementById('wind-val') ? document.getElementById('wind-val').textContent : '',
+    'Temperature': document.getElementById('temp-val') ? document.getElementById('temp-val').textContent : '',
+    'Weather Conditions': weatherConds,
+    'Overhead Cables': getRadio('overhead'),
+    'Resident Home': getRadio('resident-home'),
+    'Exclusion Zone': getRadio('exclusion'),
+    'Nearest AE': getVal('nearest-ae'),
+    'Roof Elevations': getRadio('elevations'),
+    'Access Method': accessMethods.join(', '),
+    'Panel Lifting Method': getRadio('panel-lift'),
+    'Battery Included': getRadio('battery-inc'),
+    'LPS Included': getRadio('lps'),
+    'Excavation Required': getRadio('excav'),
+    'New Hazards': getRadio('new-hazard'),
+    'Safe to Proceed': getRadio('safe-proceed'),
+    'Supervisor Declaration': document.getElementById('supervisor-declaration') && document.getElementById('supervisor-declaration').checked ? 'Confirmed' : 'Not confirmed',
+    'Stopped Reason': stoppedReason || '',
+    'Assessment Type': type
+  };
+}
+
+// EMAILJS + CREDENTIALS
+const EMAILJS_SERVICE = 'service_qu7eacj';
+const EMAILJS_TEMPLATE = 'template_iymnn5u';
+const EMAILJS_KEY = 'g8INVVwtEvz0nNRBp';
+
+// SUBMIT TO SHEETDB
+async function submitToSheet(data) {
+  const response = await fetch(SHEETDB_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: [data] })
+  });
+  if (!response.ok) throw new Error('SheetDB error');
+  return response.json();
+}
+
+// SEND EMAIL VIA EMAILJS
+async function sendEmail(data) {
+  emailjs.init(EMAILJS_KEY);
+  return emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+    reference: data['Reference'],
+    assessment_type: data['Assessment Type'],
+    timestamp: data['Timestamp'],
+    site_address: data['Site Address'],
+    customer_name: data['Customer Name'],
+    job_number: data['Job Number'],
+    start_date: data['Start Date'],
+    end_date: data['End Date'],
+    duration: data['Duration'],
+    supervisor_name: data['Supervisor Name'],
+    operatives: data['Operatives'],
+    wind_speed: data['Wind Speed (mph)'],
+    temperature: data['Temperature'],
+    weather_conditions: data['Weather Conditions'],
+    overhead_cables: data['Overhead Cables'],
+    resident_home: data['Resident Home'],
+    safe_to_proceed: data['Safe to Proceed'],
+    battery_included: data['Battery Included'],
+    lps_included: data['LPS Included'],
+    excavation_required: data['Excavation Required'],
+    new_hazards: data['New Hazards'],
+    gps_coordinates: data['GPS Coordinates']
+  });
+}
+
+// GENERATE PDF
+function generatePDF(data) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const slate = [30, 42, 56];
+  const amber = [245, 158, 11];
+  const grey = [100, 100, 100];
+  const black = [20, 20, 20];
+  const green = [22, 163, 74];
+  const red = [220, 38, 38];
+
+  const pageW = 210;
+  const margin = 14;
+  const contentW = pageW - margin * 2;
+  let y = 0;
+
+  // Header band
+  doc.setFillColor(...slate);
+  doc.rect(0, 0, pageW, 28, 'F');
+  doc.setFillColor(...amber);
+  doc.rect(0, 0, pageW, 6, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SOLAR INSTALLATION — DYNAMIC RISK ASSESSMENT', margin, 19);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('& METHOD STATEMENT', margin, 24);
+  y = 35;
+
+  // Assessment type banner
+  const isStop = data['Assessment Type'] === 'WORK STOPPED';
+  doc.setFillColor(...(isStop ? red : green));
+  doc.rect(margin, y, contentW, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text(isStop ? '⚠ WORK STOPPED ASSESSMENT' : '✓ COMPLETED ASSESSMENT', margin + 3, y + 5.5);
+  doc.text(`Ref: ${data['Reference']}`, pageW - margin - 3, y + 5.5, { align: 'right' });
+  y += 13;
+
+  // Helper functions
+  const sectionHeader = (title) => {
+    doc.setFillColor(...slate);
+    doc.rect(margin, y, contentW, 7, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title.toUpperCase(), margin + 3, y + 5);
+    y += 11;
+  };
+
+  const row = (label, value, highlight) => {
+    if (y > 270) { doc.addPage(); y = 14; }
+    doc.setTextColor(...grey);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, margin, y);
+    doc.setTextColor(...black);
+    doc.setFont('helvetica', highlight ? 'bold' : 'normal');
+    const lines = doc.splitTextToSize(value || '—', contentW - 55);
+    doc.text(lines, margin + 52, y);
+    y += Math.max(5, lines.length * 4.5);
+  };
+
+  const divider = () => {
+    doc.setDrawColor(230, 230, 230);
+    doc.line(margin, y, pageW - margin, y);
+    y += 3;
+  };
+
+  // Section 1 — Job Details
+  sectionHeader('1. Job Details');
+  row('Reference', data['Reference']);
+  row('Submitted', data['Timestamp']);
+  row('Site Address', data['Site Address']);
+  row('Postcode', data['Postcode'] || '—');
+  row('GPS Coordinates', data['GPS Coordinates'] || '—');
+  row('Customer Name', data['Customer Name']);
+  row('Job Number', data['Job Number']);
+  row('Start Date', data['Start Date']);
+  row('End Date', data['End Date']);
+  row('Duration', data['Duration']);
+  row('Supervisor', data['Supervisor Name']);
+  row('Operatives', data['Operatives']);
+  y += 3;
+
+  // Section 2 — Weather
+  sectionHeader('2. Weather & Site Conditions');
+  row('Wind Speed', `${data['Wind Speed (mph)']} mph`, true);
+  row('Temperature', `${data['Temperature']}°C`);
+  row('Conditions', data['Weather Conditions']);
+  y += 3;
+
+  // Section 3 — Key Checks
+  sectionHeader('3. Key Site Checks');
+  row('Overhead Cables', data['Overhead Cables']);
+  row('Resident Home', data['Resident Home']);
+  row('Exclusion Zone', data['Exclusion Zone']);
+  row('Nearest A&E', data['Nearest AE']);
+  row('Roof Elevations', data['Roof Elevations']);
+  row('Access Method', data['Access Method']);
+  row('Panel Lifting Method', data['Panel Lifting Method']);
+  y += 3;
+
+  // Section 4 — Specialist Work
+  sectionHeader('4. Specialist Work');
+  row('Battery Installation', data['Battery Included']);
+  row('Lightning Protection', data['LPS Included']);
+  row('Excavation Required', data['Excavation Required']);
+  y += 3;
+
+  // Section 5 — Assessment Outcome
+  sectionHeader('5. Assessment Outcome');
+  row('New Hazards Identified', data['New Hazards']);
+  row('Safe to Proceed', data['Safe to Proceed'], true);
+  if (data['Stopped Reason']) row('Stopped Reason', data['Stopped Reason'], true);
+  row('Supervisor Declaration', data['Supervisor Declaration']);
+  y += 3;
+
+  // Signature block
+  if (y > 220) { doc.addPage(); y = 14; }
+  sectionHeader('6. Signatures');
+  doc.setTextColor(...grey);
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'italic');
+  doc.text('"I confirm that I have been briefed on today\'s risks and control measures and agree to work', margin, y);
+  y += 4;
+  doc.text('in accordance with this RAMS and Dynamic Risk Assessment."', margin, y);
+  y += 8;
+
+  // Operative signatures — capture from canvas
+  if (sigState.operatives && sigState.operatives.length > 0) {
+    sigState.operatives.forEach((op, idx) => {
+      if (y > 265) { doc.addPage(); y = 14; }
+
+      // Name label
+      doc.setTextColor(...black);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text(op.name, margin, y);
+
+      // Signed status
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...(op.signed ? green : red));
+      doc.text(op.signed ? '✓ Signed' : '✗ Not signed', margin + 55, y);
+      y += 3;
+
+      // Capture canvas image
+      const canvas = document.getElementById(op.id);
+      if (canvas && op.signed) {
+        try {
+          const imgData = canvas.toDataURL('image/png');
+          doc.addImage(imgData, 'PNG', margin, y, 120, 18);
+          y += 20;
+        } catch(e) {
+          doc.setDrawColor(200, 200, 200);
+          doc.rect(margin, y, 120, 14);
+          y += 16;
+        }
+      } else {
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, y, 120, 14);
+        y += 16;
+      }
+
+      // Thin divider between operatives
+      doc.setDrawColor(230, 230, 230);
+      doc.line(margin, y, pageW - margin, y);
+      y += 4;
+    });
+  }
+
+  // Supervisor signature
+  if (y > 250) { doc.addPage(); y = 14; }
+  y += 2;
+  doc.setTextColor(...black);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Supervisor: ${data['Supervisor Name'] || ''}`, margin, y);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...(sigState.supervisorSigned ? green : red));
+  doc.text(sigState.supervisorSigned ? '✓ Signed' : '✗ Not signed', margin + 55, y);
+  y += 3;
+
+  const supCanvas = document.getElementById('sig-supervisor');
+  if (supCanvas && sigState.supervisorSigned) {
+    try {
+      const supImg = supCanvas.toDataURL('image/png');
+      doc.addImage(supImg, 'PNG', margin, y, 120, 18);
+      y += 22;
+    } catch(e) {
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin, y, 120, 14);
+      y += 16;
+    }
+  } else {
+    doc.setDrawColor(200, 200, 200);
+    doc.rect(margin, y, 120, 14);
+    y += 16;
+  }
+
+  // Date line
+  y += 4;
+  doc.setTextColor(...black);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text('Date of Assessment:', margin, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data['Timestamp'] || new Date().toLocaleString('en-GB'), margin + 45, y);
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(...slate);
+    doc.rect(0, 287, pageW, 10, 'F');
+    doc.setTextColor(180, 180, 180);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Solar Installation RAMS — ${data['Reference']} — Generated ${new Date().toLocaleString('en-GB')}`, margin, 293);
+    doc.text(`Page ${i} of ${pageCount}`, pageW - margin, 293, { align: 'right' });
+  }
+
+  // Save
+  const filename = `RAMS-${(data['Job Number'] || 'NOJOB').replace(/\s/g,'-')}-${(data['Site Address'] || 'NOADDR').substring(0,20).replace(/\s/g,'-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(filename);
+}
+
+// SUBMIT COMPLETE RAMS
+async function submitRAMS() {
+  const decl = document.getElementById('supervisor-declaration').checked;
+  if (!decl) {
+    alert('Please confirm the supervisor declaration before submitting.');
+    return;
+  }
+
+  if (!allSigned()) {
+    document.getElementById('sig-reminder').style.display = 'flex';
+    document.getElementById('sig-reminder').scrollIntoView({ behavior: 'smooth' });
+    alert('All operatives must sign before the assessment can be submitted.');
+    return;
+  }
+
+  if (!sigState.supervisorSigned) {
+    alert('Supervisor signature is required before submitting.');
+    return;
+  }
+
+  const submitBtn = document.querySelector('#sec12 .btn-green');
+  submitBtn.textContent = 'Submitting…';
+  submitBtn.disabled = true;
+
+  const ref = `RAMS-${Date.now().toString(36).toUpperCase()}`;
+  const data = collectFormData('COMPLETE', ref);
+
+  if (sigState.operatives) {
+    data['Operatives'] = sigState.operatives.map(op => `${op.name} ✓`).join(', ');
+  }
+
+  try {
+    // Run all three in parallel
+    await Promise.allSettled([
+      submitToSheet(data),
+      sendEmail(data)
+    ]);
+
+    // Generate PDF regardless
+    generatePDF(data);
+    showSuccess('COMPLETE', ref);
+  } catch(e) {
+    submitBtn.textContent = '✅ Submit Completed Assessment';
+    submitBtn.disabled = false;
+    alert('Submission failed — check your connection and try again. Your data has not been lost.');
+  }
+}
+
+// SUBMIT STOPPED ASSESSMENT
+async function submitStopped() {
+  const detail = document.getElementById('stopped-detail').value;
+  if (!detail.trim()) {
+    alert('Please describe the reason work cannot proceed.');
+    return;
+  }
+
+  const ref = `RAMS-STOP-${Date.now().toString(36).toUpperCase()}`;
+  const data = collectFormData('WORK STOPPED', ref);
+  data['Stopped Reason'] = stoppedReason + ' — ' + detail;
+  data['Safe to Proceed'] = 'No';
+
+  try {
+    await Promise.allSettled([
+      submitToSheet(data),
+      sendEmail(data)
+    ]);
+    generatePDF(data);
+    showSuccess('STOPPED', ref);
+  } catch(e) {
+    alert('Submission failed — check your connection and try again.');
+  }
+}
+
+function showSuccess(type, ref) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('stopped-work-section').classList.remove('show');
+
+  document.getElementById('ref-number').textContent = ref;
+  document.getElementById('success-datetime').textContent = new Date().toLocaleString('en-GB');
+  document.getElementById('success-location').textContent = currentAddress || 'On site';
+
+  document.getElementById('sec-success').classList.add('active');
+  document.getElementById('progress-fill').style.width = '100%';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
