@@ -1,54 +1,220 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Safety Sphere</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetySphere — Solar Installation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1923;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: #1e2a38;
+    padding: 0;
+    border-bottom: 3px solid #f59e0b;
+  }
+
+  .header-inner {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 24px 20px 20px;
+    text-align: center;
+  }
+
+  .logo {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f59e0b;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  main {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 28px 16px 48px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+
+  .app-card {
+    display: block;
+    text-decoration: none;
+    background: #1e2a38;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1.5px solid #263548;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .app-card:hover, .app-card:active {
+    border-color: #f59e0b;
+    transform: translateY(-1px);
+  }
+
+  .app-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .app-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-blue { background: #1e3a8a; }
+  .icon-amber { background: #78350f; }
+  .icon-red { background: #7f1d1d; }
+  .icon-green { background: #14532d; }
+
+  .app-text { flex: 1; }
+
+  .app-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 3px;
+    letter-spacing: -0.01em;
+  }
+
+  .app-desc {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  .app-arrow {
+    color: #475569;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .app-card:hover .app-arrow { color: #f59e0b; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #1e2a38;
+    margin: 20px 0;
+  }
+
+  .info-box {
+    background: #1e2a38;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.6;
+    border-left: 3px solid #f59e0b;
+  }
+
+  .info-box strong { color: #94a3b8; }
+
+  footer {
+    text-align: center;
+    padding: 16px;
+    font-size: 11px;
+    color: #334155;
+  }
+</style>
 </head>
-<body style="font-family: Arial; text-align: center; padding: 40px;">
+<body>
 
-  <h1>The Safety Sphere</h1>
+<header>
+  <div class="header-inner">
+    <div class="logo">SafetySphere</div>
+    <h1>Solar Installation</h1>
+    <p class="subtitle">Health &amp; Safety Management System</p>
+  </div>
+</header>
 
-  <p><strong>Your protective layer for health, safety, and wellbeing — at work, at home, and in public.</strong></p>
+<main>
 
-  <hr>
+  <p class="section-label">Select your task</p>
 
-  <h2>What is the Safety Sphere?</h2>
+  <a class="app-card" href="solar-rams.html">
+    <div class="app-card-inner">
+      <div class="app-icon icon-blue">🌅</div>
+      <div class="app-text">
+        <div class="app-name">Morning Assessment</div>
+        <div class="app-desc">Complete before work starts. Risk assessment, site conditions, team briefing and sign-off.</div>
+      </div>
+      <div class="app-arrow">›</div>
+    </div>
+  </a>
 
-  <p>
-    The Safety Sphere is the environment that surrounds you — your work, your home, 
-    and the public spaces you move through every day.
-  </p>
+  <a class="app-card" href="end-of-day.html">
+    <div class="app-card-inner">
+      <div class="app-icon icon-green">🌆</div>
+      <div class="app-text">
+        <div class="app-name">End of Day Check</div>
+        <div class="app-desc">Complete before leaving site. Confirm site is secured, isolated and safe overnight.</div>
+      </div>
+      <div class="app-arrow">›</div>
+    </div>
+  </a>
 
-  <p>
-    When that environment is managed properly, it protects you. When it’s not, it exposes you to risk.
-  </p>
+  <a class="app-card" href="incident-report.html">
+    <div class="app-card-inner">
+      <div class="app-icon icon-red">⚠️</div>
+      <div class="app-text">
+        <div class="app-name">Incident / Near Miss Report</div>
+        <div class="app-desc">Report an accident, near miss or dangerous occurrence. Use this at any time during the working day.</div>
+      </div>
+      <div class="app-arrow">›</div>
+    </div>
+  </a>
 
-  <p>
-    I help businesses and individuals build that protective layer — through practical health and safety support, 
-    clear guidance, and real-world solutions.
-  </p>
+  <hr class="divider">
 
-  <hr>
+  <div class="info-box">
+    <strong>How it works</strong><br>
+    Start a Morning Assessment when you arrive on site. You'll receive a job reference number — keep this. Use it when completing the End of Day Check or reporting an incident so all records are linked to the same job.
+  </div>
 
-  <h2>Who I Help</h2>
+</main>
 
-  <p>Sole traders | Subcontractors | SMEs | Contractors</p>
-
-  <hr>
-
-  <h2>When You Need Me</h2>
-
-  <p>
-    HSE involvement<br>
-    Accidents or near misses<br>
-    Systems not working<br>
-    You need it sorted quickly
-  </p>
-
-  <hr>
-
-  <h2>Contact</h2>
-
-  <p>Email: coming soon</p>
+<footer>SafetySphere Health &amp; Safety · Solar Installation Division</footer>
 
 </body>
 </html>
