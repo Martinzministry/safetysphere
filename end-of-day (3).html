@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>End of Day Site Check</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --slate: #1e2a38; --amber: #f59e0b; --amber-light: #fef3c7;
+    --red: #dc2626; --red-light: #fee2e2; --green: #16a34a; --green-light: #dcfce7;
+    --blue: #1d4ed8; --blue-light: #dbeafe;
+    --grey-100: #f3f4f6; --grey-200: #e5e7eb; --grey-400: #9ca3af;
+    --grey-600: #4b5563; --grey-800: #1f2937; --radius: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--grey-100); color: var(--grey-800); font-size: 15px; line-height: 1.5; }
+  header { background: var(--slate); color: white; }
+  .header-top { background: var(--green); padding: 6px 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: white; }
+  .header-body { padding: 16px 20px; }
+  .header-body h1 { font-size: 18px; font-weight: 700; }
+  .header-body p { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .container { max-width: 680px; margin: 0 auto; padding: 20px 16px 60px; }
+  .card { background: white; border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+  .card-header { background: var(--slate); color: white; padding: 12px 18px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .card-num { background: var(--green); color: white; font-weight: 800; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .card-body { padding: 18px; }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--grey-800); margin-bottom: 6px; }
+  label .hint { font-weight: 400; color: var(--grey-400); font-size: 12px; display: block; margin-top: 1px; }
+  input[type="text"], input[type="time"], input[type="date"], textarea, select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--grey-200); border-radius: var(--radius); font-size: 14px; color: var(--grey-800); background: white; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blue); }
+  textarea { min-height: 80px; resize: vertical; }
+  .radio-group { display: flex; flex-direction: column; gap: 8px; }
+  .radio-group.inline { flex-direction: row; flex-wrap: wrap; gap: 10px; }
+  .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+  .radio-item input { width: 16px; height: 16px; }
+  .branch { display: none; background: var(--grey-100); border-left: 3px solid var(--amber); border-radius: 0 var(--radius) var(--radius) 0; padding: 14px; margin-top: 10px; }
+  .branch.show { display: block; }
+  .branch-red { border-left-color: var(--red); background: var(--red-light); }
+  .alert { border-radius: var(--radius); padding: 12px 14px; font-size: 13px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; }
+  .alert-blue { background: var(--blue-light); color: #1e3a8a; border-left: 3px solid var(--blue); }
+  .alert-amber { background: var(--amber-light); color: #78350f; border-left: 3px solid var(--amber); }
+  .alert-green { background: var(--green-light); color: #14532d; border-left: 3px solid var(--green); }
+  .divider { border: none; border-top: 1px solid var(--grey-200); margin: 16px 0; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; border: none; width: 100%; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-back { background: white; color: var(--grey-600); border: 1.5px solid var(--grey-200); text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: var(--radius); font-size: 13px; margin-bottom: 12px; }
+  .readonly { background: var(--grey-100); color: var(--grey-600); }
+  .success-box { background: white; border-radius: var(--radius); padding: 40px 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">🌆 End of Day Site Check</div>
+  <div class="header-body">
+    <h1>End of Day Check</h1>
+    <p>Complete before leaving site each day</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <a class="btn-back" href="index.html">← Back to menu</a>
+
+  <div id="form-content">
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">1</div> Job Reference</div>
+      <div class="card-body">
+        <div class="alert alert-blue">
+          <span class="alert-icon">ℹ️</span>
+          <span>Enter the reference number from this morning's assessment so this record is linked to the same job.</span>
+        </div>
+        <div class="field">
+          <label>Morning Assessment Reference <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="job-ref" placeholder="e.g. RAMS-ABC123" style="text-transform:uppercase;">
+        </div>
+        <div class="field">
+          <label>Site Address</label>
+          <input type="text" id="site-address" placeholder="Confirm site address">
+        </div>
+        <div class="field">
+          <label>Supervisor Name</label>
+          <input type="text" id="supervisor-name">
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="eod-date">
+        </div>
+        <div class="field">
+          <label>Time leaving site</label>
+          <input type="time" id="eod-time">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">2</div> Installation Status</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Are any panels left partially installed overnight?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-panels" value="yes" onchange="toggleBranch('eod-panels-b','yes',this.value)"> Yes</label>
+            <label class="radio-item"><input type="radio" name="eod-panels" value="no" onchange="toggleBranch('eod-panels-b','yes',this.value)"> No</label>
+          </div>
+          <div class="branch" id="eod-panels-b">
+            <div class="field"><label>Describe state and overnight controls</label><textarea placeholder="Which panels, how secured, isolation status, hazard to anyone…"></textarea></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>All electrical systems safely isolated for overnight?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-elec"> Yes — isolated and locked off</label>
+            <label class="radio-item"><input type="radio" name="eod-elec"> No — describe below</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Solar panels producing power overnight? (exposed to light)</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-solar"> Yes — capped / isolated</label>
+            <label class="radio-item"><input type="radio" name="eod-solar"> No — covered / not yet connected</label>
+            <label class="radio-item"><input type="radio" name="eod-solar"> N/A</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">3</div> Site Security</div>
+      <div class="card-body">
+        <div class="field">
+          <label>All materials and equipment removed or secured from roof?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-materials"> Yes</label>
+            <label class="radio-item"><input type="radio" name="eod-materials" onchange="document.getElementById('materials-b').classList.add('show')"> No — describe</label>
+          </div>
+          <div class="branch branch-red" id="materials-b">
+            <div class="field"><label>What is left on the roof and why?</label><textarea></textarea></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Scaffold / access equipment secured against unauthorised access?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-scaffold"> Yes</label>
+            <label class="radio-item"><input type="radio" name="eod-scaffold"> No scaffold on site</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Any open excavations covered and barriers in place?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-excav"> Yes</label>
+            <label class="radio-item"><input type="radio" name="eod-excav"> No excavations on site</label>
+            <label class="radio-item"><input type="radio" name="eod-excav" onchange="document.getElementById('excav-b').classList.add('show')"> Excavation — not covered</label>
+          </div>
+          <div class="branch branch-red" id="excav-b">
+            <div class="alert alert-red" style="margin-bottom:0;"><span class="alert-icon">🛑</span><span>Open excavations must be covered and barriers erected before leaving site.</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Site left clean and tidy — no trip hazards or debris?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-clean"> Yes</label>
+            <label class="radio-item"><input type="radio" name="eod-clean"> No — describe</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Resident / client informed of overnight status and expected return?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-client"> Yes</label>
+            <label class="radio-item"><input type="radio" name="eod-client"> No — property unoccupied</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">4</div> Handover Notes</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Have conditions changed significantly since this morning?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-changed" value="yes" onchange="toggleBranch('changed-b','yes',this.value)"> Yes</label>
+            <label class="radio-item"><input type="radio" name="eod-changed" value="no" onchange="toggleBranch('changed-b','yes',this.value)"> No</label>
+          </div>
+          <div class="branch" id="changed-b">
+            <div class="field"><label>Describe changes — new risks, scope changes, damage, discoveries</label><textarea></textarea></div>
+            <div class="alert alert-amber" style="margin-top:8px;margin-bottom:0;"><span class="alert-icon">⚠️</span><span>A new morning assessment must be completed before work restarts if conditions have changed significantly.</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>End of day notes for handover</label>
+          <textarea placeholder="Progress made today, outstanding tasks, anything the returning team needs to know…"></textarea>
+        </div>
+        <div class="field">
+          <label>Expected return date and time</label>
+          <input type="text" placeholder="e.g. Tomorrow 07:30">
+        </div>
+        <div class="field">
+          <label>Work complete on this site?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="eod-complete"> Yes — job complete</label>
+            <label class="radio-item"><input type="radio" name="eod-complete"> No — returning tomorrow</label>
+            <label class="radio-item"><input type="radio" name="eod-complete"> No — return date TBC</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">5</div> Supervisor Declaration</div>
+      <div class="card-body">
+        <div class="alert alert-blue">
+          <span class="alert-icon">✍️</span>
+          <span><em>"I confirm that the site has been left in a safe condition, all equipment has been secured or removed, and the client has been informed of the overnight status."</em></span>
+        </div>
+        <div class="field">
+          <label class="radio-item" style="font-weight:600;">
+            <input type="checkbox" id="eod-declaration">
+            I confirm the above declaration
+          </label>
+        </div>
+        <div class="field">
+          <label>Supervisor Signature <span style="color:#dc2626;">*</span></label>
+          <canvas id="sig-supervisor" style="border:1.5px solid #e5e7eb;border-radius:6px;background:white;width:100%;height:100px;cursor:crosshair;display:block;touch-action:none;"></canvas>
+          <button onclick="clearSig()" style="margin-top:6px;padding:6px 12px;background:white;border:1.5px solid #e5e7eb;border-radius:6px;font-size:12px;cursor:pointer;">Clear</button>
+        </div>
+        <div class="field">
+          <label>Date &amp; time</label>
+          <input type="text" id="eod-datetime" class="readonly" readonly>
+        </div>
+        <button class="btn btn-green" onclick="submitEOD()">✅ Submit End of Day Check</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div style="font-size:50px;margin-bottom:12px;">✅</div>
+    <h2 style="font-size:20px;font-weight:800;color:#1e2a38;margin-bottom:6px;">End of Day Submitted</h2>
+    <p style="color:#4b5563;font-size:13px;margin-bottom:16px;">Site check recorded successfully.</p>
+    <div style="background:#f3f4f6;border-radius:6px;padding:14px;text-align:left;font-size:13px;">
+      <div><strong>Reference:</strong> <span id="success-ref"></span></div>
+      <div style="margin-top:4px;"><strong>Time:</strong> <span id="success-time"></span></div>
+    </div>
+    <a href="index.html" style="display:block;margin-top:16px;padding:12px;background:#1e2a38;color:white;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;">← Back to menu</a>
+  </div>
+
+</div>
+
+<script>
+const SHEETDB_URL = 'https://sheetdb.io/api/v1/rtr81twntihqh?sheet=End%20of%20Day';
+const EMAILJS_SERVICE = 'service_qu7eacj';
+const EMAILJS_TEMPLATE = 'template_iymnn5u';
+const EMAILJS_KEY = 'g8INVVwtEvz0nNRBp';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  document.getElementById('eod-datetime').value = now.toLocaleString('en-GB');
+  document.getElementById('eod-date').value = now.toISOString().split('T')[0];
+  const t = now.toTimeString().slice(0,5);
+  document.getElementById('eod-time').value = t;
+  setTimeout(initSigPad, 100);
+});
+
+let sigSigned = false;
+
+function initSigPad() {
+  const canvas = document.getElementById('sig-supervisor');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width || 600;
+  canvas.height = 100;
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#1e2a38'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  let drawing = false;
+  const getPos = (e) => { const r = canvas.getBoundingClientRect(); const src = e.touches ? e.touches[0] : e; return { x: src.clientX - r.left, y: src.clientY - r.top }; };
+  const start = (e) => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+  const draw = (e) => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); sigSigned = true; };
+  const stop = (e) => { e.preventDefault(); drawing = false; };
+  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stop); canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); canvas.addEventListener('touchend', stop, { passive: false });
+}
+
+function clearSig() {
+  const canvas = document.getElementById('sig-supervisor');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  sigSigned = false;
+}
+
+function toggleBranch(id, showVal, currentVal) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('show', currentVal === showVal);
+}
+
+async function submitEOD() {
+  const ref = document.getElementById('job-ref').value.trim();
+  if (!ref) { alert('Please enter the morning assessment reference number.'); return; }
+  const decl = document.getElementById('eod-declaration').checked;
+  if (!decl) { alert('Please confirm the supervisor declaration before submitting.'); return; }
+  if (!sigSigned) { alert('Supervisor signature is required before submitting.'); return; }
+
+  const btn = document.querySelector('.btn-green');
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+
+  const eodRef = `EOD-${Date.now().toString(36).toUpperCase()}`;
+  const data = {
+    'Timestamp': new Date().toLocaleString('en-GB'),
+    'Reference': eodRef,
+    'Assessment Type': 'END OF DAY',
+    'Site Address': document.getElementById('site-address').value,
+    'Supervisor Name': document.getElementById('supervisor-name').value,
+    'Job Number': ref,
+    'Start Date': document.getElementById('eod-date').value,
+    'Supervisor Declaration': 'Confirmed'
+  };
+
+  try {
+    await fetch(SHEETDB_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [data] })
+    });
+    emailjs.init(EMAILJS_KEY);
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      reference: eodRef,
+      assessment_type: 'END OF DAY CHECK',
+      timestamp: new Date().toLocaleString('en-GB'),
+      site_address: data['Site Address'],
+      supervisor_name: data['Supervisor Name'],
+      job_number: ref,
+      customer_name: '—', start_date: '—', end_date: '—', duration: '—',
+      operatives: '—', wind_speed: '—', temperature: '—', weather_conditions: '—',
+      overhead_cables: '—', resident_home: '—', safe_to_proceed: 'Yes — end of day',
+      battery_included: '—', lps_included: '—', excavation_required: '—',
+      new_hazards: '—', gps_coordinates: '—'
+    });
+    generateEODPDF(data, eodRef);
+  } catch(e) { console.log('Submission error', e); generateEODPDF(data, eodRef); }
+
+  document.getElementById('success-ref').textContent = eodRef;
+  document.getElementById('success-time').textContent = new Date().toLocaleString('en-GB');
+  document.getElementById('form-content').style.display = 'none';
+  document.getElementById('success-box').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function generateEODPDF(data, ref) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const slate = [30, 42, 56], green = [22, 163, 74], grey = [100,100,100], black = [20,20,20];
+  const pageW = 210, margin = 14, contentW = pageW - margin * 2;
+  let y = 0;
+
+  // Header
+  doc.setFillColor(...slate); doc.rect(0, 0, pageW, 28, 'F');
+  doc.setFillColor(...green); doc.rect(0, 0, pageW, 6, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('SOLAR INSTALLATION — END OF DAY SITE CHECK', margin, 19);
+  y = 35;
+
+  // Banner
+  doc.setFillColor(...green); doc.rect(margin, y, contentW, 8, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('✓ END OF DAY CHECK', margin+3, y+5.5);
+  doc.text(`Ref: ${ref}`, pageW-margin-3, y+5.5, { align: 'right' });
+  y += 13;
+
+  const row = (label, value) => {
+    if (y > 270) { doc.addPage(); y = 14; }
+    doc.setTextColor(...grey); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.text(label, margin, y);
+    doc.setTextColor(...black); doc.setFont('helvetica','normal');
+    const lines = doc.splitTextToSize(value || '—', contentW - 55);
+    doc.text(lines, margin+52, y);
+    y += Math.max(5, lines.length * 4.5);
+  };
+
+  const sectionHeader = (title) => {
+    doc.setFillColor(...slate); doc.rect(margin, y, contentW, 7, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.text(title.toUpperCase(), margin+3, y+5);
+    y += 11;
+  };
+
+  sectionHeader('Job Reference');
+  row('EOD Reference', ref);
+  row('Linked RAMS Ref', data['Job Number']);
+  row('Site Address', data['Site Address']);
+  row('Supervisor', data['Supervisor Name']);
+  row('Date', data['Start Date']);
+  row('Submitted', data['Timestamp']);
+  y += 3;
+
+  // Get radio values from form
+  const getRadio = (name) => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.parentElement.textContent.trim() : '—'; };
+
+  sectionHeader('Installation Status');
+  row('Panels partially installed', getRadio('eod-panels'));
+  row('Electrical isolated', getRadio('eod-elec'));
+  row('Solar panels isolated', getRadio('eod-solar'));
+  y += 3;
+
+  sectionHeader('Site Security');
+  row('Materials secured', getRadio('eod-materials'));
+  row('Scaffold secured', getRadio('eod-scaffold'));
+  row('Excavations covered', getRadio('eod-excav'));
+  row('Site clean and tidy', getRadio('eod-clean'));
+  row('Client informed', getRadio('eod-client'));
+  y += 3;
+
+  sectionHeader('Handover');
+  row('Conditions changed', getRadio('eod-changed'));
+  row('Work complete', getRadio('eod-complete'));
+  y += 3;
+
+  sectionHeader('Declaration');
+  row('Supervisor Declaration', 'Confirmed');
+  row('Supervisor', data['Supervisor Name']);
+  y += 4;
+  doc.setTextColor(...grey); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+  doc.text('Signature', margin, y);
+  const sigCanvas = document.getElementById('sig-supervisor');
+  if (sigCanvas && sigSigned) {
+    try {
+      const sigImg = sigCanvas.toDataURL('image/png');
+      doc.addImage(sigImg, 'PNG', margin+52, y-4, 100, 16);
+    } catch(e) {
+      doc.setDrawColor(200,200,200); doc.rect(margin+52, y-4, 100, 14);
+    }
+  }
+  y += 18;
+
+  // Footer
+  doc.setFillColor(...slate); doc.rect(0, 287, pageW, 10, 'F');
+  doc.setTextColor(180,180,180); doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text(`Solar Installation End of Day Check — ${ref} — ${new Date().toLocaleString('en-GB')}`, margin, 293);
+
+  const filename = `EOD-${(data['Site Address']||'SITE').substring(0,20).replace(/\s/g,'-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(filename);
+}
+</script>
+</body>
+</html>
