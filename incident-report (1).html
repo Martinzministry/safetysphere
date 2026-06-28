@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident / Near Miss Report</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root {
+    --slate: #1e2a38; --amber: #f59e0b; --amber-light: #fef3c7;
+    --red: #dc2626; --red-light: #fee2e2; --green: #16a34a; --green-light: #dcfce7;
+    --blue: #1d4ed8; --blue-light: #dbeafe;
+    --grey-100: #f3f4f6; --grey-200: #e5e7eb; --grey-400: #9ca3af;
+    --grey-600: #4b5563; --grey-800: #1f2937; --radius: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--grey-100); color: var(--grey-800); font-size: 15px; line-height: 1.5; }
+  header { background: var(--slate); }
+  .header-top { background: var(--red); padding: 6px 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: white; }
+  .header-body { padding: 16px 20px; color: white; }
+  .header-body h1 { font-size: 18px; font-weight: 700; }
+  .header-body p { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .container { max-width: 680px; margin: 0 auto; padding: 20px 16px 60px; }
+  .card { background: white; border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+  .card-header { background: var(--slate); color: white; padding: 12px 18px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .card-num { background: var(--red); color: white; font-weight: 800; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .card-body { padding: 18px; }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--grey-800); margin-bottom: 6px; }
+  label .hint { font-weight: 400; color: var(--grey-400); font-size: 12px; display: block; margin-top: 1px; }
+  input[type="text"], input[type="time"], input[type="date"], textarea, select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--grey-200); border-radius: var(--radius); font-size: 14px; color: var(--grey-800); background: white; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blue); }
+  textarea { min-height: 100px; resize: vertical; }
+  .radio-group { display: flex; flex-direction: column; gap: 8px; }
+  .radio-group.inline { flex-direction: row; flex-wrap: wrap; gap: 10px; }
+  .radio-item, .check-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+  .radio-item input, .check-item input { width: 16px; height: 16px; flex-shrink: 0; }
+  .check-group { display: flex; flex-direction: column; gap: 8px; }
+  .branch { display: none; background: var(--grey-100); border-left: 3px solid var(--amber); border-radius: 0 var(--radius) var(--radius) 0; padding: 14px; margin-top: 10px; }
+  .branch.show { display: block; }
+  .branch-red { border-left-color: var(--red); background: var(--red-light); }
+  .alert { border-radius: var(--radius); padding: 12px 14px; font-size: 13px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; }
+  .alert-red { background: var(--red-light); color: #7f1d1d; border-left: 3px solid var(--red); }
+  .alert-amber { background: var(--amber-light); color: #78350f; border-left: 3px solid var(--amber); }
+  .alert-blue { background: var(--blue-light); color: #1e3a8a; border-left: 3px solid var(--blue); }
+  .divider { border: none; border-top: 1px solid var(--grey-200); margin: 16px 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; border: none; width: 100%; }
+  .btn-red { background: var(--red); color: white; }
+  .btn-back { background: white; color: var(--grey-600); border: 1.5px solid var(--grey-200); text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: var(--radius); font-size: 13px; margin-bottom: 12px; }
+  .readonly { background: var(--grey-100); color: var(--grey-600); }
+  .riddor-box { background: var(--red-light); border: 2px solid var(--red); border-radius: var(--radius); padding: 16px; margin-top: 12px; }
+  .riddor-box h3 { color: var(--red); font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .riddor-box p { font-size: 12px; color: #7f1d1d; line-height: 1.5; }
+  .success-box { background: white; border-radius: var(--radius); padding: 40px 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: none; }
+  @media (max-width: 480px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">⚠️ Incident / Near Miss Report</div>
+  <div class="header-body">
+    <h1>Incident Report</h1>
+    <p>Use this form to report any accident, near miss or dangerous occurrence</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <a class="btn-back" href="index.html">← Back to menu</a>
+
+  <div class="alert alert-red">
+    <span class="alert-icon">🚨</span>
+    <span><strong>If this is a life-threatening emergency, call 999 immediately.</strong> Complete this form after the immediate situation has been made safe.</span>
+  </div>
+
+  <div id="form-content">
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">1</div> Job Reference &amp; Location</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Morning Assessment Reference
+            <span class="hint">Enter the reference from today's morning RAMS — links this report to the job</span>
+          </label>
+          <input type="text" id="job-ref" placeholder="e.g. RAMS-ABC123" style="text-transform:uppercase;">
+        </div>
+        <div class="field">
+          <label>Site Address <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="site-address" placeholder="Full site address">
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <label>Date of incident <span style="color:#dc2626;">*</span></label>
+            <input type="date" id="incident-date">
+          </div>
+          <div class="field">
+            <label>Time of incident <span style="color:#dc2626;">*</span></label>
+            <input type="time" id="incident-time">
+          </div>
+        </div>
+        <div class="field">
+          <label>Supervisor / Reporter Name <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="supervisor-name">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">2</div> Type of Incident</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Select all that apply <span style="color:#dc2626;">*</span></label>
+          <div class="check-group">
+            <label class="check-item"><input type="checkbox" name="itype" value="accident"> Accident / injury to person</label>
+            <label class="check-item"><input type="checkbox" name="itype" value="nearmiss"> Near miss</label>
+            <label class="check-item"><input type="checkbox" name="itype" value="dangerous"> Dangerous occurrence</label>
+            <label class="check-item"><input type="checkbox" name="itype" value="property"> Property damage</label>
+            <label class="check-item"><input type="checkbox" name="itype" value="environmental"> Environmental incident</label>
+            <label class="check-item"><input type="checkbox" name="itype" value="security"> Security / theft</label>
+            <label class="check-item"><input type="checkbox" name="itype" value="other"> Other</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Activity being carried out at time of incident <span style="color:#dc2626;">*</span></label>
+          <select id="activity">
+            <option value="">Select…</option>
+            <option>Unloading / moving panels to site</option>
+            <option>Lifting panels to roof level</option>
+            <option>Working on roof — panel installation</option>
+            <option>Working on roof — fixing / racking</option>
+            <option>Electrical connection work</option>
+            <option>Battery installation</option>
+            <option>Lightning rod installation</option>
+            <option>Excavation / cable routing</option>
+            <option>Working on scaffold / access equipment</option>
+            <option>Loading / unloading vehicle</option>
+            <option>Manual handling on ground level</option>
+            <option>Other — describe below</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">3</div> Person(s) Involved</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Name(s) of person(s) involved <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="persons-involved" placeholder="Full names and roles">
+        </div>
+        <div class="field">
+          <label>Was anyone injured? <span style="color:#dc2626;">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="injured" value="yes-999" onchange="showInjuryBranch(this.value)"> Yes — 999 called / ambulance attended</label>
+            <label class="radio-item"><input type="radio" name="injured" value="yes-hospital" onchange="showInjuryBranch(this.value)"> Yes — taken to hospital (not 999)</label>
+            <label class="radio-item"><input type="radio" name="injured" value="yes-firstaid" onchange="showInjuryBranch(this.value)"> Yes — first aid treatment only</label>
+            <label class="radio-item"><input type="radio" name="injured" value="no" onchange="showInjuryBranch(this.value)"> No injury</label>
+          </div>
+          <div class="branch" id="injury-branch">
+            <div class="field">
+              <label>Nature of injury / injuries</label>
+              <div class="check-group">
+                <label class="check-item"><input type="checkbox"> Fracture / broken bone</label>
+                <label class="check-item"><input type="checkbox"> Laceration / cut</label>
+                <label class="check-item"><input type="checkbox"> Head injury</label>
+                <label class="check-item"><input type="checkbox"> Eye injury</label>
+                <label class="check-item"><input type="checkbox"> Burns / scalds</label>
+                <label class="check-item"><input type="checkbox"> Electric shock</label>
+                <label class="check-item"><input type="checkbox"> Sprain / strain / muscle injury</label>
+                <label class="check-item"><input type="checkbox"> Back injury</label>
+                <label class="check-item"><input type="checkbox"> Loss of consciousness</label>
+                <label class="check-item"><input type="checkbox"> Other — describe below</label>
+              </div>
+            </div>
+            <div class="field"><label>Body part(s) affected</label><input type="text" placeholder="e.g. left hand, lower back…"></div>
+            <div class="field"><label>Hospital attended (if applicable)</label><input type="text" placeholder="Hospital name"></div>
+            <div class="field"><label>First aider name</label><input type="text"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Witnesses</label>
+          <input type="text" id="witnesses" placeholder="Names of any witnesses">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">4</div> What Happened</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Full description of incident <span style="color:#dc2626;">*</span>
+            <span class="hint">Include what happened, how it happened, sequence of events, environmental conditions at the time</span>
+          </label>
+          <textarea id="incident-description" style="min-height:150px;" placeholder="Describe in as much detail as possible…"></textarea>
+        </div>
+        <div class="field">
+          <label>Immediate action taken</label>
+          <textarea id="immediate-action" placeholder="First aid given, area made safe, services called, people informed…"></textarea>
+        </div>
+        <div class="field">
+          <label>Root cause (initial assessment)</label>
+          <div class="check-group">
+            <label class="check-item"><input type="checkbox"> Unsafe act by person involved</label>
+            <label class="check-item"><input type="checkbox"> Unsafe condition / environment</label>
+            <label class="check-item"><input type="checkbox"> Equipment failure or defect</label>
+            <label class="check-item"><input type="checkbox"> Inadequate supervision</label>
+            <label class="check-item"><input type="checkbox"> Inadequate training or instruction</label>
+            <label class="check-item"><input type="checkbox"> Weather / environmental conditions</label>
+            <label class="check-item"><input type="checkbox"> PPE failure or not worn</label>
+            <label class="check-item"><input type="checkbox"> RAMS not followed</label>
+            <label class="check-item"><input type="checkbox"> Unknown / under investigation</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Photos taken of incident scene?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="photos"> Yes</label>
+            <label class="radio-item"><input type="radio" name="photos"> No</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">5</div> RIDDOR Assessment</div>
+      <div class="card-body">
+        <div class="alert alert-amber">
+          <span class="alert-icon">⚠️</span>
+          <span>RIDDOR requires reporting of certain workplace incidents to the HSE. Your H&amp;S lead will make the final determination — flag it here if you think it may apply.</span>
+        </div>
+
+        <div class="field">
+          <label>Do you believe this incident may be RIDDOR reportable?</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="riddor" value="yes" onchange="document.getElementById('riddor-box').style.display='block'"> Yes — H&amp;S lead notified</label>
+            <label class="radio-item"><input type="radio" name="riddor" value="unsure" onchange="document.getElementById('riddor-box').style.display='block'"> Unsure — referred to H&amp;S lead</label>
+            <label class="radio-item"><input type="radio" name="riddor" value="no" onchange="document.getElementById('riddor-box').style.display='none'"> No</label>
+          </div>
+          <div class="riddor-box" id="riddor-box" style="display:none;">
+            <h3>RIDDOR Categories — Solar Installation Work</h3>
+            <p>Must be reported: death, specified injuries (fractures excluding fingers/thumbs/toes, amputations, loss of sight, crush injuries, scalping, loss of consciousness from head injury or asphyxia, any injury requiring hospital admission for more than 24hrs), over-7-day injuries, dangerous occurrences (scaffold collapse, electrical incidents, unintended release of substances).</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Has work been suspended as a result of this incident?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="work-suspended"> Yes</label>
+            <label class="radio-item"><input type="radio" name="work-suspended"> No — work continues safely</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>H&amp;S lead notified?</label>
+          <div class="radio-group inline">
+            <label class="radio-item"><input type="radio" name="hs-notified"> Yes — <span style="font-size:12px;color:#4b5563;">martin@safetysphere.uk</span></label>
+            <label class="radio-item"><input type="radio" name="hs-notified"> Not yet</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-num">6</div> Declaration</div>
+      <div class="card-body">
+        <div class="alert alert-blue">
+          <span class="alert-icon">✍️</span>
+          <span><em>"I confirm that the information provided in this report is accurate and complete to the best of my knowledge."</em></span>
+        </div>
+        <div class="field">
+          <label class="check-item" style="font-weight:600;">
+            <input type="checkbox" id="inc-declaration">
+            I confirm the above declaration
+          </label>
+        </div>
+        <div class="field">
+          <label>Date &amp; time of report</label>
+          <input type="text" id="inc-datetime" class="readonly" readonly>
+        </div>
+        <button class="btn btn-red" onclick="submitIncident()">⚠️ Submit Incident Report</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div style="font-size:50px;margin-bottom:12px;">✅</div>
+    <h2 style="font-size:20px;font-weight:800;color:#1e2a38;margin-bottom:6px;">Incident Report Submitted</h2>
+    <p style="color:#4b5563;font-size:13px;margin-bottom:4px;">Your report has been sent to the H&amp;S lead and logged.</p>
+    <p style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:16px;">If RIDDOR reportable — ensure H&amp;S lead has been contacted directly.</p>
+    <div style="background:#f3f4f6;border-radius:6px;padding:14px;text-align:left;font-size:13px;">
+      <div><strong>Report Reference:</strong> <span id="success-ref"></span></div>
+      <div style="margin-top:4px;"><strong>Submitted:</strong> <span id="success-time"></span></div>
+    </div>
+    <a href="index.html" style="display:block;margin-top:16px;padding:12px;background:#1e2a38;color:white;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;">← Back to menu</a>
+  </div>
+
+</div>
+
+<script>
+const SHEETDB_URL = 'https://sheetdb.io/api/v1/rtr81twntihqh?sheet=Incident%20Reports';
+const EMAILJS_SERVICE = 'service_qu7eacj';
+const EMAILJS_TEMPLATE = 'template_iymnn5u';
+const EMAILJS_KEY = 'g8INVVwtEvz0nNRBp';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  document.getElementById('inc-datetime').value = now.toLocaleString('en-GB');
+  document.getElementById('incident-date').value = now.toISOString().split('T')[0];
+  document.getElementById('incident-time').value = now.toTimeString().slice(0,5);
+});
+
+function showInjuryBranch(val) {
+  document.getElementById('injury-branch').classList.toggle('show', val !== 'no');
+}
+
+async function submitIncident() {
+  const addr = document.getElementById('site-address').value.trim();
+  const desc = document.getElementById('incident-description').value.trim();
+  const decl = document.getElementById('inc-declaration').checked;
+
+  if (!addr) { alert('Please enter the site address.'); return; }
+  if (!desc) { alert('Please describe what happened.'); return; }
+  if (!decl) { alert('Please confirm the declaration before submitting.'); return; }
+
+  const btn = document.querySelector('.btn-red');
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+
+  const incRef = `INC-${Date.now().toString(36).toUpperCase()}`;
+  const types = Array.from(document.querySelectorAll('input[name="itype"]:checked')).map(e => e.value).join(', ');
+  const riddor = document.querySelector('input[name="riddor"]:checked')?.value || 'Not assessed';
+
+  const data = {
+    'Timestamp': new Date().toLocaleString('en-GB'),
+    'Reference': incRef,
+    'Assessment Type': 'INCIDENT REPORT',
+    'Site Address': addr,
+    'Supervisor Name': document.getElementById('supervisor-name').value,
+    'Job Number': document.getElementById('job-ref').value,
+    'Start Date': document.getElementById('incident-date').value,
+    'Operatives': document.getElementById('persons-involved').value,
+    'New Hazards': types,
+    'Stopped Reason': desc,
+    'Safe to Proceed': riddor === 'yes' ? 'No — RIDDOR' : 'Under review',
+    'Supervisor Declaration': 'Confirmed'
+  };
+
+  try {
+    await fetch(SHEETDB_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [data] })
+    });
+    emailjs.init(EMAILJS_KEY);
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      reference: incRef,
+      assessment_type: `INCIDENT REPORT — ${types.toUpperCase()}`,
+      timestamp: new Date().toLocaleString('en-GB'),
+      site_address: addr,
+      supervisor_name: document.getElementById('supervisor-name').value,
+      job_number: document.getElementById('job-ref').value,
+      customer_name: document.getElementById('persons-involved').value,
+      start_date: document.getElementById('incident-date').value,
+      end_date: document.getElementById('incident-time').value,
+      duration: types,
+      operatives: document.getElementById('persons-involved').value,
+      wind_speed: riddor,
+      temperature: '—', weather_conditions: desc.substring(0,200),
+      overhead_cables: '—', resident_home: '—',
+      safe_to_proceed: riddor === 'yes' ? 'NO — RIDDOR REPORTABLE' : 'Under review',
+      battery_included: '—', lps_included: '—', excavation_required: '—',
+      new_hazards: types, gps_coordinates: '—'
+    });
+  } catch(e) { console.log('Submission error', e); }
+
+  document.getElementById('success-ref').textContent = incRef;
+  document.getElementById('success-time').textContent = new Date().toLocaleString('en-GB');
+  document.getElementById('form-content').style.display = 'none';
+  document.getElementById('success-box').style.display = 'block';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
