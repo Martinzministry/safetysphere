@@ -1,0 +1,1474 @@
+<!DOCTYPE html><!-- SafetySphere Inspection v3.0 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetySphere Inspection</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--slate:#1e2a38;--slate2:#263548;--purple:#7c3aed;--purpleL:#ede9fe;--green:#16a34a;--greenL:#dcfce7;--amber:#d97706;--amberL:#fef3c7;--red:#dc2626;--redL:#fee2e2;--darkred:#7f1d1d;--darkredL:#fecaca;--blue:#1d4ed8;--blueL:#dbeafe;--g100:#f3f4f6;--g200:#e5e7eb;--g400:#9ca3af;--g600:#4b5563;--g800:#1f2937;--r:8px;--sh:0 2px 8px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f2f5;color:var(--g800);font-size:15px;line-height:1.5;min-height:100vh}
+.app-header{background:var(--slate);color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hstripe{background:var(--purple);height:4px}
+.hinner{padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.htitle{font-size:16px;font-weight:700}
+.hsub{font-size:11px;color:#94a3b8;margin-top:1px}
+.opct{font-size:22px;font-weight:800;letter-spacing:-.03em}
+.timer-display{font-size:11px;color:#94a3b8;margin-top:2px;font-variant-numeric:tabular-nums}
+.page{display:none}.page.active{display:block}
+.cont{max-width:640px;margin:0 auto;padding:20px 14px 80px}
+.card{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:14px;overflow:hidden}
+.ch{background:var(--slate);color:#fff;padding:12px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.cb{padding:16px}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tbtn{border:2px solid var(--g200);border-radius:var(--r);padding:16px 10px;text-align:center;cursor:pointer;background:#fff;transition:all .15s}
+.tbtn:hover,.tbtn.sel{border-color:var(--purple);background:var(--purpleL)}
+.tbtn .ti{font-size:28px;margin-bottom:6px}
+.tbtn .tl{font-size:13px;font-weight:700}
+.tbtn .ts{font-size:11px;color:var(--g400);margin-top:2px}
+.stgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stbtn{border:1.5px solid var(--g200);border-radius:var(--r);padding:12px 8px;text-align:center;cursor:pointer;background:#fff;font-size:13px;font-weight:600;transition:all .15s}
+.stbtn:hover,.stbtn.sel{border-color:var(--purple);background:var(--purpleL);color:var(--purple)}
+.field{margin-bottom:13px}.field:last-child{margin-bottom:0}
+label{display:block;font-size:11px;font-weight:700;color:var(--g600);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid var(--g200);border-radius:6px;font-size:14px;color:var(--g800);background:#fff;appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple)}
+textarea{min-height:65px;resize:vertical}
+.ro{background:var(--g100);color:var(--g600)}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ld{background:var(--g100);border-radius:6px;padding:9px 11px;font-size:13px;color:var(--g600);border:1.5px dashed var(--g200);margin-bottom:7px}
+.ld strong{display:block;color:var(--g800);font-size:14px}
+.wdisp{background:var(--slate);color:#fff;border-radius:6px;padding:11px 13px;display:flex;align-items:center;gap:12px;margin-bottom:7px}
+.wtemp{font-size:26px;font-weight:800}
+.wdesc{font-size:13px;font-weight:600}
+.winfo{font-size:11px;color:#94a3b8}
+.bstart{background:var(--purple);color:#fff;border:none;border-radius:var(--r);padding:15px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:6px}
+.bstart:hover{background:#6d28d9}
+.scard{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:8px;overflow:hidden}
+.shdr{padding:13px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:background .15s}
+.shdr:hover{background:var(--g100)}
+.shdr.open{border-bottom:1px solid var(--g200)}
+.sname{font-size:14px;font-weight:700}
+.sslabel{font-size:12px;margin-top:2px;font-weight:600}
+.sarrow{font-size:11px;color:var(--g400);transition:transform .2s;flex-shrink:0;margin-left:10px}
+.sarrow.open{transform:rotate(180deg)}
+.sbody{display:none;padding:10px;background:#fafafa}
+.sbody.open{display:block}
+.icard{background:#fff;border-radius:6px;border:1px solid var(--g200);margin-bottom:9px}
+.icard:last-child{margin-bottom:0}
+.ihdr{padding:11px 13px 7px}
+.iname{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:2px}
+.ilegal{font-size:11px;color:var(--g400);margin-bottom:2px}
+.icert{font-size:11px;color:var(--amber);font-weight:600}
+.ibody{padding:0 13px 13px}
+.ifield{margin-top:7px}
+.ifield label{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.ifield select,.ifield textarea,.ifield input{font-size:13px;padding:7px 10px}
+.sselect{width:100%;padding:8px 11px;border:1.5px solid var(--g200);border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;appearance:none;background:#fff}
+.sselect.sc-outstanding{background:#f5f3ff;color:#7c3aed;border-color:#7c3aed}
+.sselect.sc-compliant{background:#dcfce7;color:#16a34a;border-color:#16a34a}
+.sselect.sc-satisfactory{background:#fef3c7;color:#d97706;border-color:#d97706}
+.sselect.sc-noncompliant{background:#fee2e2;color:#dc2626;border-color:#dc2626}
+.sselect.sc-negligent{background:#fecaca;color:#7f1d1d;border-color:#7f1d1d}
+.sselect.sc-na{background:#f3f4f6;color:#374151;border-color:#374151}
+.pharea{margin-top:9px;border:2px dashed var(--g200);border-radius:6px;padding:10px;background:var(--g100)}
+.phrow{display:flex;align-items:center;gap:9px}
+.phbtn{background:var(--slate);color:#fff;border:none;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+.phbtn:hover{background:var(--slate2)}
+.phprev{width:58px;height:58px;object-fit:cover;border-radius:4px;display:none}
+.aiload{display:none;text-align:center;padding:10px;color:var(--g400);font-size:13px;margin-top:8px}
+.airesult{margin-top:9px;background:var(--purpleL);border-left:3px solid var(--purple);border-radius:0 6px 6px 0;padding:9px 11px;display:none}
+.airesult-title{font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.airesult p{font-size:12px;color:var(--g800);margin-bottom:3px}
+.airesult strong{color:var(--purple)}
+.alert{border-radius:6px;padding:9px 11px;font-size:13px;margin-bottom:11px;display:flex;align-items:flex-start;gap:8px}
+.alert-purple{background:var(--purpleL);color:#4c1d95;border-left:3px solid var(--purple)}
+.subbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--g200);padding:11px 14px;z-index:50}
+.bsub{background:var(--purple);color:#fff;border:none;border-radius:var(--r);padding:13px;font-size:15px;font-weight:700;cursor:pointer;width:100%}
+.bsub:hover{background:#6d28d9}
+.c-purple{color:var(--purple)}.c-green{color:var(--green)}.c-amber{color:var(--amber)}.c-red{color:var(--red)}.c-darkred{color:var(--darkred)}
+.sigcanvas{border:1.5px solid var(--g200);border-radius:6px;background:#fff;width:100%;height:100px;cursor:crosshair;display:block;touch-action:none;margin-top:7px}
+.bclrsig{padding:5px 11px;background:#fff;border:1.5px solid var(--g200);border-radius:6px;font-size:12px;cursor:pointer;margin-top:5px}
+.search-bar-wrap{position:sticky;top:62px;z-index:90;background:#f0f2f5;padding:8px 12px;border-bottom:1px solid #e5e7eb}
+.search-bar{width:100%;padding:10px 14px 10px 36px;border:1.5px solid #e5e7eb;border-radius:20px;font-size:14px;background:#fff;outline:none;transition:border-color .15s}
+.search-bar:focus{border-color:var(--purple)}
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:#9ca3af;pointer-events:none}
+.search-results-count{font-size:11px;color:#9ca3af;text-align:center;margin-top:4px}
+.section-hidden{display:none!important}
+
+.bback{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#fff;border:1.5px solid var(--g200);border-radius:6px;font-size:13px;color:var(--g600);cursor:pointer;margin-bottom:14px}
+.succ{max-width:480px;margin:40px auto;padding:16px;text-align:center}
+.succ-card{background:#fff;border-radius:var(--r);padding:36px 22px;box-shadow:var(--sh)}
+@media(max-width:480px){.tc{grid-template-columns:1fr}.tgrid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="hstripe"></div>
+  <div class="hinner">
+    <div><div class="htitle">SafetySphere Inspection</div><div class="hsub" id="hsub">Setup</div><div class="timer-display" id="timer-display" style="display:none">⏱ <span id="timer-val">00:00:00</span></div></div>
+    <div style="text-align:right"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em">Overall</div><div class="opct c-purple" id="opct">—</div></div>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div class="page active" id="pg-setup">
+<div class="cont">
+  <div class="card">
+    <div class="ch">Inspection Type</div>
+    <div class="cb">
+      <div class="tgrid">
+        <div class="tbtn" id="tb-construction" onclick="selType('construction')"><div class="ti">🏗️</div><div class="tl">Construction Site</div><div class="ts">PC or Subcontractor</div></div>
+        <div class="tbtn" id="tb-depot" onclick="selType('depot')"><div class="ti">🏭</div><div class="tl">Depot / Office</div><div class="ts">Manager or Visiting</div></div>
+      </div>
+      <div id="st-construction" style="display:none;margin-top:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Inspection Role</div>
+        <div class="stgrid">
+          <div class="stbtn" id="sb-pc" onclick="selSub('pc')">Principal Contractor</div>
+          <div class="stbtn" id="sb-sub" onclick="selSub('subcontractor')">Subcontractor</div>
+        </div>
+      </div>
+      <div id="st-depot" style="display:none;margin-top:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Manager Status</div>
+        <div class="stgrid">
+          <div class="stbtn" id="sb-present" onclick="selSub('manager-present')">Depot Manager Present</div>
+          <div class="stbtn" id="sb-absent" onclick="selSub('manager-absent')">Depot Manager Absent</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Site / Depot Details</div>
+    <div class="cb">
+      <div class="field"><label>Site / Depot Name *</label><input type="text" id="site-name" placeholder="Enter site or depot name"></div>
+      <div class="field"><label>F10 Reference</label><input type="text" id="f10" placeholder="If applicable"></div>
+      <div class="field"><label>GPS Location</label>
+        <div class="ld"><strong id="loc-addr">Detecting location...</strong><span id="loc-coords" style="font-size:11px;color:#9ca3af"></span></div>
+        <input type="text" id="site-addr" placeholder="Confirm or correct address">
+      </div>
+      <div class="field"><label>Client</label><input type="text" id="client"></div>
+      <div class="field"><label>Principal Contractor</label><input type="text" id="pc-name"></div>
+      <div class="tc">
+        <div class="field"><label>Client Project Manager</label><input type="text" id="cpm"></div>
+        <div class="field"><label>Client Site Manager</label><input type="text" id="csm"></div>
+      </div>
+      <div class="field"><label>Client Supervisors</label><input type="text" id="csups" placeholder="Names of supervisors present"></div>
+      <div class="tc">
+        <div class="field"><label>Operatives (PAYE)</label><input type="number" id="ops-paye" placeholder="0" min="0"></div>
+        <div class="field"><label>Operatives (Sole Trader)</label><input type="number" id="ops-sole" placeholder="0" min="0"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Inspector & Timing</div>
+    <div class="cb">
+      <div class="field"><label>Inspector Name *</label><input type="text" id="inspector" placeholder="Your name" value="Martin Miller"></div>
+      <div class="tc">
+        <div class="field"><label>Inspection Date *</label><input type="date" id="ins-date"></div>
+        <div class="field"><label>Start Time *</label><input type="time" id="ins-time"></div>
+      </div>
+      <div class="field"><label>Tasks Being Undertaken Today</label><textarea id="tasks" placeholder="Describe the main activities on site today…"></textarea></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Weather (Auto-detected)</div>
+    <div class="cb">
+      <div class="wdisp">
+        <div><div class="wtemp" id="wtemp">—</div><div style="font-size:11px;color:#94a3b8">°C</div></div>
+        <div><div class="wdesc" id="wdesc">Fetching…</div><div class="winfo">Wind: <span id="wwind">—</span> mph · Open-Meteo</div></div>
+      </div>
+      <div class="field"><label>Weather Notes</label><input type="text" id="wnotes" placeholder="Any weather conditions affecting the inspection…"></div>
+    </div>
+  </div>
+
+  <button class="bstart" onclick="startInspection()">Start Inspection →</button>
+</div>
+</div>
+
+<!-- INSPECTION -->
+<div class="page" id="pg-inspection">
+<div class="search-bar-wrap" id="search-bar-wrap" style="display:none">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-bar" id="section-search" placeholder="Search inspection sections..." oninput="filterSections(this.value)">
+  </div>
+  <div class="search-results-count" id="search-count"></div>
+</div>
+<div class="cont" id="sec-container"></div>
+<div class="subbar"><button class="bsub" onclick="showReview()">Review & Sign Off →</button></div>
+</div>
+
+<!-- REVIEW PAGE -->
+<div class="page" id="pg-review">
+<div class="cont">
+  <button class="bback" onclick="showPage('pg-inspection')">← Back to Inspection</button>
+  <div class="card">
+    <div class="ch">Inspection Review</div>
+    <div class="cb">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:48px;font-weight:800;color:var(--purple)" id="rev-overall">—</div>
+        <div style="font-size:12px;color:var(--g600)">Overall Score</div>
+      </div>
+      <div id="rev-categories"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Findings Summary</div>
+    <div class="cb" id="rev-findings"></div>
+  </div>
+  <button class="bsub" onclick="showSignatures()">Proceed to Sign Off →</button>
+</div>
+</div>
+
+<!-- SIGNATURE PAGE -->
+<div class="page" id="pg-submit">
+<div class="cont">
+  <button class="bback" onclick="showPage('pg-review')">← Back to Review</button>
+
+  <div class="card">
+    <div class="ch">Site Representative Sign Off</div>
+    <div class="cb">
+      <div class="alert alert-purple"><span>✍️</span><span><em>"I confirm that I have been present during this inspection and that the findings are an accurate record of the site conditions observed."</em></span></div>
+      <div class="field"><label>Full Name *</label><input type="text" id="rep-name" placeholder="Site representative full name"></div>
+      <div class="field"><label>Job Title *</label><input type="text" id="rep-title" placeholder="e.g. Site Manager, Depot Manager"></div>
+      <div class="field"><label>Company</label><input type="text" id="rep-company" placeholder="Company name"></div>
+      <div class="field"><label>Signature *</label><canvas class="sigcanvas" id="rep-sig"></canvas><button class="bclrsig" onclick="clrRepSig()">Clear</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">Inspector Declaration & Signature</div>
+    <div class="cb">
+      <div class="alert alert-purple"><span>✍️</span><span><em>"I confirm that this inspection has been carried out thoroughly and that the findings recorded are accurate to the best of my knowledge."</em></span></div>
+      <div class="field"><label style="text-transform:none;letter-spacing:0;font-size:13px;display:flex;align-items:center;gap:8px;font-weight:600"><input type="checkbox" id="ins-decl" style="width:16px;height:16px;flex-shrink:0"> I confirm the above declaration</label></div>
+      <div class="field"><label>Inspector Signature *</label><canvas class="sigcanvas" id="ins-sig"></canvas><button class="bclrsig" onclick="clrSig()">Clear</button></div>
+      <div class="field"><label>Submission Date & Time</label><input type="text" id="sub-dt" class="ro" readonly></div>
+      <button class="bsub" style="margin-top:11px" onclick="submitInspection()">Submit & Generate Report</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SUCCESS -->
+<div class="page" id="pg-success">
+<div class="succ">
+  <div class="succ-card">
+    <div style="font-size:52px;margin-bottom:14px">✅</div>
+    <h2 style="font-size:21px;font-weight:800;color:var(--slate);margin-bottom:7px">Inspection Submitted</h2>
+    <p style="color:var(--g600);font-size:14px;margin-bottom:18px">Report saved, email sent, PDF downloaded.</p>
+    <div style="background:var(--g100);border-radius:8px;padding:14px;text-align:left;font-size:13px;margin-bottom:18px">
+      <div><strong>Reference:</strong> <span id="suc-ref"></span></div>
+      <div style="margin-top:4px"><strong>Overall Score:</strong> <span id="suc-score"></span></div>
+      <div style="margin-top:4px"><strong>Location:</strong> <span id="suc-loc"></span></div>
+      <div style="margin-top:4px"><strong>Submitted:</strong> <span id="suc-time"></span></div>
+    </div>
+    <a href="index.html" style="display:block;padding:13px;background:var(--slate);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">← Back to Menu</a>
+  </div>
+</div>
+</div>
+
+<script>
+const ANTHROPIC_KEY='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';
+const SHEETDB='https://sheetdb.io/api/v1/26dv5mle8zs5r';
+const EJS='service_qu7eacj';
+const EJT='template_iymnn5u';
+const EJK='g8INVVwtEvz0nNRBp';
+
+const SCORES={outstanding:100,compliant:80,satisfactory:60,noncompliant:20,negligent:0,na:null};
+
+const OBS_OPTIONS=['No issues observed -- compliant','Minor housekeeping issue','Documentation incomplete or missing','Training records not available or out of date','Equipment defect identified','Procedure not being followed','PPE not worn or incorrect PPE for task','Signage missing or inadequate','Access or egress obstructed','Unsafe behaviour observed','Permit to work missing or expired','RAMS not available or not followed','Inspection records not maintained','Welfare facilities inadequate','Work stopped -- immediate danger identified','Other -- see details below'];
+
+const SECTIONS=[
+{id:'asbestos',name:'Asbestos Management',items:[
+{id:'a1',name:'Asbestos survey reviewed and available on site',legal:'Control of Asbestos Regs 2012, HSG264, L143',cert:'N/A'},
+{id:'a2',name:'ACMs labelled and protected',legal:'Control of Asbestos Regs 2012, HSG264',cert:'N/A'},
+{id:'a3',name:'Licensed contractor appointed where required',legal:'Control of Asbestos Regs 2012, Reg 8',cert:'Licensed Asbestos Contractor (UKAS)'},
+{id:'a4',name:'Exposure control plan in place',legal:'Control of Asbestos Regs 2012, L143',cert:'N/A'},
+{id:'a5',name:'Hazardous waste disposal arranged',legal:'Control of Asbestos Regs 2012, HSG264',cert:'N/A'}]},
+{id:'confined',name:'Confined Spaces',items:[
+{id:'cs1',name:'Confined space identified and risk assessed',legal:'Confined Spaces Regs 1997, Reg 3',cert:'N/A'},
+{id:'cs2',name:'Permit to enter in place',legal:'Confined Spaces Regs 1997, Reg 4',cert:'N/A'},
+{id:'cs3',name:'Atmospheric testing carried out',legal:'Confined Spaces Regs 1997, L101',cert:'Confined Space Operative'},
+{id:'cs4',name:'Rescue plan and equipment available',legal:'Confined Spaces Regs 1997, Reg 5',cert:'Confined Space Rescue'},
+{id:'cs5',name:'Trained operatives only entering',legal:'Confined Spaces Regs 1997, Reg 5',cert:'Confined Space Entry'}]},
+{id:'demolition',name:'Demolition',items:[
+{id:'d1',name:'Pre-demolition survey completed',legal:'BS 6187:2011, CDM 2015 Reg 4',cert:'N/A'},
+{id:'d2',name:'Demolition method statement approved',legal:'CDM 2015, BS 6187',cert:'N/A'},
+{id:'d3',name:'Structural engineer sign-off obtained',legal:'BS 6187:2011',cert:'Chartered Structural Engineer'},
+{id:'d4',name:'Exclusion zones established and enforced',legal:'CDM 2015, BS 6187',cert:'N/A'},
+{id:'d5',name:'Dust and debris controls in place',legal:'COSHH Regs 2002, BS 6187',cert:'N/A'}]},
+{id:'digitalrep',name:'Digital Reporting & Compliance',items:[
+{id:'dr1',name:'Digital safety platform in use and up to date',legal:'HSWA 1974 s.2',cert:'N/A'},
+{id:'dr2',name:'Incident reporting system accessible to all workers',legal:'RIDDOR 2013',cert:'N/A'},
+{id:'dr3',name:'Inspection records maintained digitally',legal:'CDM 2015 Reg 4',cert:'N/A'},
+{id:'dr4',name:'Near miss reporting culture evidenced',legal:'HSWA 1974 s.7',cert:'N/A'}]},
+{id:'digitalsys',name:'Digital Safety Systems',items:[
+{id:'ds1',name:'Emergency communication system operational',legal:'HSWA 1974 s.2, MHSWR 1999 Reg 8',cert:'N/A'},
+{id:'ds2',name:'CCTV and monitoring systems functional',legal:'HSWA 1974',cert:'N/A'},
+{id:'ds3',name:'Lone worker alarm system in place',legal:'MHSWR 1999 Reg 3',cert:'N/A'}]},
+{id:'docs',name:'Documentation & Records',items:[
+{id:'dc1',name:'Construction Phase Plan available and current',legal:'CDM 2015 Reg 12',cert:'N/A'},
+{id:'dc2',name:'RAMS in place for all current activities',legal:'MHSWR 1999 Reg 3',cert:'N/A'},
+{id:'dc3',name:'F10 notification displayed',legal:'CDM 2015 Reg 6',cert:'N/A'},
+{id:'dc4',name:'Insurance certificates available',legal:'Employers Liability (Compulsory Insurance) Act 1969',cert:'N/A'},
+{id:'dc5',name:'Competency records available for all operatives',legal:'CDM 2015 Reg 8, MHSWR 1999',cert:'N/A'},
+{id:'dc6',name:'Induction records maintained',legal:'CDM 2015, MHSWR 1999 Reg 13',cert:'N/A'}]},
+{id:'electrical',name:'Electrical Safety',items:[
+{id:'e1',name:'Temporary electrical installation inspected',legal:'EaWR 1989 Reg 4, BS 7671',cert:'N/A'},
+{id:'e2',name:'PAT testing in date on all tools and equipment',legal:'EaWR 1989 Reg 4, PUWER 1998',cert:'N/A'},
+{id:'e3',name:'RCDs in use on all portable tools',legal:'EaWR 1989 Reg 4',cert:'N/A'},
+{id:'e4',name:'Overhead and underground services identified',legal:'EaWR 1989 Reg 14, HSG47',cert:'N/A'},
+{id:'e5',name:'Isolation procedures in place',legal:'EaWR 1989 Reg 12',cert:'Authorised Person (Electrical)'},
+{id:'e6',name:'No damaged cables or equipment observed',legal:'EaWR 1989 Reg 4',cert:'N/A'}]},
+{id:'env',name:'Environmental Controls',items:[
+{id:'ev1',name:'Waste segregation and disposal arrangements in place',legal:'Environmental Protection Act 1990',cert:'N/A'},
+{id:'ev2',name:'Spill kits available and accessible',legal:'Water Resources Act 1991',cert:'N/A'},
+{id:'ev3',name:'Fuel and chemical storage bunded',legal:'Control of Pollution (Oil Storage) Regs 2001',cert:'N/A'},
+{id:'ev4',name:'No burning of waste on site',legal:'Environmental Protection Act 1990',cert:'N/A'},
+{id:'ev5',name:'Dust suppression measures in use',legal:'Environmental Protection Act 1990 s.79',cert:'N/A'}]},
+{id:'excav',name:'Excavation & Groundworks',items:[
+{id:'ex1',name:'CAT and Genny survey completed before excavation',legal:'HSG47, EaWR 1989',cert:'CAT & Genny Trained'},
+{id:'ex2',name:'Excavation edges supported or battering applied',legal:'CDM 2015 Reg 22, BS 6031',cert:'N/A'},
+{id:'ex3',name:'Excavations inspected at start of each shift',legal:'CDM 2015 Reg 22',cert:'Competent Person'},
+{id:'ex4',name:'Safe access and egress to excavation',legal:'CDM 2015 Reg 22',cert:'N/A'},
+{id:'ex5',name:'Barriers and covers in place when unattended',legal:'CDM 2015 Reg 22',cert:'N/A'},
+{id:'ex6',name:'Spoil stored away from excavation edge',legal:'CDM 2015 Reg 22, BS 6031',cert:'N/A'}]},
+{id:'fire',name:'Fire Safety',items:[
+{id:'f1',name:'Fire risk assessment in place and current',legal:'RR(FS)O 2005 Art 9',cert:'N/A'},
+{id:'f2',name:'Fire extinguishers available, inspected and in date',legal:'RR(FS)O 2005 Art 13, BS 5306',cert:'N/A'},
+{id:'f3',name:'Fire assembly point established and signed',legal:'RR(FS)O 2005 Art 15',cert:'N/A'},
+{id:'f4',name:'Fire escape routes clear and unobstructed',legal:'RR(FS)O 2005 Art 14',cert:'N/A'},
+{id:'f5',name:'Fire warden appointed and trained',legal:'RR(FS)O 2005 Art 13',cert:'Fire Warden'},
+{id:'f6',name:'Hot works permit system in operation',legal:'RR(FS)O 2005, HSG168',cert:'N/A'},
+{id:'f7',name:'No combustible materials near ignition sources',legal:'RR(FS)O 2005 Art 12',cert:'N/A'}]},
+{id:'firstaid',name:'First Aid & Emergency Planning',items:[
+{id:'fa1',name:'First aid kit available and fully stocked',legal:'H&S (First Aid) Regs 1981 Reg 3',cert:'N/A'},
+{id:'fa2',name:'Qualified first aider present on site',legal:'H&S (First Aid) Regs 1981 Reg 3',cert:'First Aid at Work'},
+{id:'fa3',name:'Nearest A&E hospital identified and communicated',legal:'H&S (First Aid) Regs 1981',cert:'N/A'},
+{id:'fa4',name:'Emergency contacts displayed',legal:'MHSWR 1999 Reg 8',cert:'N/A'},
+{id:'fa5',name:'Accident book available and maintained',legal:'RIDDOR 2013',cert:'N/A'}]},
+{id:'coshh',name:'Hazardous Substances (COSHH)',items:[
+{id:'c1',name:'COSHH assessments available for all substances on site',legal:'COSHH Regs 2002 Reg 6',cert:'N/A'},
+{id:'c2',name:'Safety Data Sheets available',legal:'COSHH Regs 2002 Reg 8',cert:'N/A'},
+{id:'c3',name:'Substances stored correctly and labelled',legal:'COSHH Regs 2002, CHIP 2009',cert:'N/A'},
+{id:'c4',name:'Exposure controls in place and monitored',legal:'COSHH Regs 2002 Reg 7',cert:'N/A'},
+{id:'c5',name:'RPE provided and fit-tested where required',legal:'COSHH Regs 2002 Reg 7, PPEWR 1992',cert:'RPE Fit Test'}]},
+{id:'hotworks',name:'Hot Works',items:[
+{id:'hw1',name:'Hot works permit issued and in use',legal:'RR(FS)O 2005, HSG168',cert:'N/A'},
+{id:'hw2',name:'Fire watch in place during and after hot works',legal:'RR(FS)O 2005 Art 12, HSG168',cert:'N/A'},
+{id:'hw3',name:'Combustibles removed or protected',legal:'RR(FS)O 2005 Art 12',cert:'N/A'},
+{id:'hw4',name:'Appropriate fire extinguisher immediately available',legal:'RR(FS)O 2005 Art 13',cert:'N/A'},
+{id:'hw5',name:'Operatives trained in hot works procedures',legal:'HSG168',cert:'Hot Works Trained'}]},
+{id:'housekeeping',name:'Housekeeping & Site Tidiness',items:[
+{id:'hk1',name:'Walkways and access routes clear of obstructions',legal:'HSWA 1974 s.2, Workplace Regs 1992 Reg 12',cert:'N/A'},
+{id:'hk2',name:'Waste removed regularly and stored safely',legal:'Environmental Protection Act 1990',cert:'N/A'},
+{id:'hk3',name:'Materials stored safely and secured',legal:'HSWA 1974 s.2, CDM 2015',cert:'N/A'},
+{id:'hk4',name:'No trip, slip or fall hazards observed',legal:'HSWA 1974, Workplace Regs 1992 Reg 12',cert:'N/A'},
+{id:'hk5',name:'Site office and welfare areas clean and tidy',legal:'Workplace (H,S&W) Regs 1992',cert:'N/A'}]},
+{id:'inclusion',name:'Inclusion & Diversity',items:[
+{id:'id1',name:'Equality and diversity policy displayed',legal:'Equality Act 2010',cert:'N/A'},
+{id:'id2',name:'Welfare facilities suitable for all genders',legal:'Workplace Regs 1992, CDM 2015',cert:'N/A'},
+{id:'id3',name:'No evidence of bullying, harassment or discrimination',legal:'Equality Act 2010, HSWA 1974',cert:'N/A'},
+{id:'id4',name:'Language barriers addressed in safety communications',legal:'MHSWR 1999 Reg 10',cert:'N/A'}]},
+{id:'lifting',name:'Lifting Operations',items:[
+{id:'lo1',name:'Lifting equipment LOLER inspected and in date',legal:'LOLER 1998 Reg 9',cert:'Appointed Person (Lifting)'},
+{id:'lo2',name:'Lift plan in place for all lifting operations',legal:'LOLER 1998 Reg 8',cert:'N/A'},
+{id:'lo3',name:'Appointed person supervising all lifts',legal:'LOLER 1998 Reg 8',cert:'Appointed Person'},
+{id:'lo4',name:'SWL clearly marked on all lifting equipment',legal:'LOLER 1998 Reg 7',cert:'N/A'},
+{id:'lo5',name:'Exclusion zone established under lift area',legal:'LOLER 1998 Reg 8',cert:'N/A'},
+{id:'lo6',name:'Trained crane or MEWP operator in control',legal:'LOLER 1998, PUWER 1998',cert:'CPCS / IPAF'}]},
+{id:'lighting',name:'Lighting & Visibility',items:[
+{id:'li1',name:'Adequate lighting throughout work areas',legal:'Workplace Regs 1992 Reg 8',cert:'N/A'},
+{id:'li2',name:'Emergency lighting tested and functional',legal:'RR(FS)O 2005, BS 5266',cert:'N/A'},
+{id:'li3',name:'Task lighting available for detailed work',legal:'Workplace Regs 1992 Reg 8',cert:'N/A'},
+{id:'li4',name:'Temporary lighting secured and not a trip hazard',legal:'HSWA 1974, EaWR 1989',cert:'N/A'}]},
+{id:'mh',name:'Manual Handling',items:[
+{id:'mh1',name:'Manual handling assessments completed',legal:'MHO Regs 1992 Reg 4',cert:'N/A'},
+{id:'mh2',name:'Mechanical aids used to reduce manual handling',legal:'MHO Regs 1992 Reg 4',cert:'N/A'},
+{id:'mh3',name:'Operatives trained in manual handling techniques',legal:'MHO Regs 1992 Reg 4, MHSWR 1999 Reg 13',cert:'N/A'},
+{id:'mh4',name:'No unsafe manual handling observed',legal:'MHO Regs 1992',cert:'N/A'}]},
+{id:'mentalh',name:'Mental Health & Worker Wellbeing',items:[
+{id:'mhw1',name:'Mental health policy displayed and communicated',legal:'HSWA 1974 s.2',cert:'N/A'},
+{id:'mhw2',name:'Mental health first aider available',legal:'HSWA 1974 s.2',cert:'Mental Health First Aid'},
+{id:'mhw3',name:'Employee assistance programme in place',legal:'HSWA 1974 s.2',cert:'N/A'},
+{id:'mhw4',name:'No evidence of excessive workload or fatigue',legal:'Working Time Regs 1998, MHSWR 1999',cert:'N/A'},
+{id:'mhw5',name:'Workers aware of who to speak to about concerns',legal:'HSWA 1974 s.7',cert:'N/A'}]},
+{id:'noise',name:'Noise, Dust & Vibration',items:[
+{id:'n1',name:'Noise risk assessment completed',legal:'Control of Noise at Work Regs 2005 Reg 5',cert:'N/A'},
+{id:'n2',name:'Hearing protection provided and worn in noise zones',legal:'Control of Noise at Work Regs 2005 Reg 7',cert:'N/A'},
+{id:'n3',name:'Dust suppression measures in use',legal:'COSHH Regs 2002, Environmental Protection Act 1990',cert:'N/A'},
+{id:'n4',name:'HAV exposure monitored and controlled',legal:'Control of Vibration at Work Regs 2005 Reg 5',cert:'N/A'},
+{id:'n5',name:'Health surveillance in place for noise and vibration',legal:'Control of Noise Regs 2005 Reg 9',cert:'N/A'}]},
+{id:'occhealth',name:'Occupational Health & Wellbeing',items:[
+{id:'oh1',name:'Occupational health surveillance programme in place',legal:'COSHH Regs 2002 Reg 11',cert:'N/A'},
+{id:'oh2',name:'HAVS assessment and monitoring records available',legal:'Control of Vibration at Work Regs 2005',cert:'N/A'},
+{id:'oh3',name:'Skin protection measures in place',legal:'COSHH Regs 2002',cert:'N/A'},
+{id:'oh4',name:'Respiratory health monitoring for dusty trades',legal:'COSHH Regs 2002 Reg 11',cert:'N/A'}]},
+{id:'ppe',name:'Personal Protective Equipment',items:[
+{id:'p1',name:'All operatives wearing appropriate PPE for tasks',legal:'PPEWR 1992 (as amended 2022) Reg 4',cert:'N/A'},
+{id:'p2',name:'PPE in good condition with no visible defects',legal:'PPEWR 1992 Reg 7',cert:'N/A'},
+{id:'p3',name:'PPE stored correctly when not in use',legal:'PPEWR 1992 Reg 7',cert:'N/A'},
+{id:'p4',name:'Safety helmets worn in designated areas',legal:'PPEWR 1992, CDM 2015',cert:'N/A'},
+{id:'p5',name:'Hi-visibility clothing worn by all on site',legal:'PPEWR 1992',cert:'N/A'},
+{id:'p6',name:'Safety footwear worn by all operatives',legal:'PPEWR 1992',cert:'N/A'},
+{id:'p7',name:'Harnesses inspected and worn where required',legal:'PPEWR 1992, WAH Regs 2005',cert:'N/A'}]},
+{id:'access',name:'Site Access, Security & Setup',items:[
+{id:'sa1',name:'Site access controlled -- unauthorised entry prevented',legal:'CDM 2015 Reg 22, HSWA 1974 s.4',cert:'N/A'},
+{id:'sa2',name:'Visitor and contractor sign-in system in place',legal:'CDM 2015, MHSWR 1999 Reg 11',cert:'N/A'},
+{id:'sa3',name:'Site induction completed for all persons on site',legal:'CDM 2015 Reg 13, MHSWR 1999',cert:'N/A'},
+{id:'sa4',name:'Out of bounds areas clearly identified',legal:'CDM 2015, HSWA 1974',cert:'N/A'},
+{id:'sa5',name:'CSCS cards or equivalent held by all operatives',legal:'CDM 2015 Reg 8',cert:'CSCS Card'}]},
+{id:'boundary',name:'Site Boundary',items:[
+{id:'sb1',name:'Site hoarding and fencing in good condition',legal:'CDM 2015 Reg 22, HSWA 1974 s.4',cert:'N/A'},
+{id:'sb2',name:'No gaps in site boundary perimeter',legal:'CDM 2015 Reg 22',cert:'N/A'},
+{id:'sb3',name:'Anti-climb measures in place',legal:'HSWA 1974 s.4',cert:'N/A'},
+{id:'sb4',name:'Boundary lighting adequate for night works',legal:'Workplace Regs 1992 Reg 8',cert:'N/A'}]},
+{id:'comms',name:'Site Communications',items:[
+{id:'sc1',name:'Emergency communication system available and tested',legal:'MHSWR 1999 Reg 8',cert:'N/A'},
+{id:'sc2',name:'All operatives have means to raise alarm',legal:'MHSWR 1999 Reg 8',cert:'N/A'},
+{id:'sc3',name:'Toolbox talks and briefings recorded',legal:'CDM 2015, MHSWR 1999 Reg 13',cert:'N/A'},
+{id:'sc4',name:'Method statements communicated to all operatives',legal:'MHSWR 1999 Reg 10',cert:'N/A'}]},
+{id:'signage',name:'Site Signage',items:[
+{id:'ss1',name:'Mandatory signs displayed covering PPE requirements',legal:'H&S (Safety Signs & Signals) Regs 1996',cert:'N/A'},
+{id:'ss2',name:'Prohibition signs in place where required',legal:'H&S (Safety Signs & Signals) Regs 1996',cert:'N/A'},
+{id:'ss3',name:'Warning signs appropriate to hazards present',legal:'H&S (Safety Signs & Signals) Regs 1996',cert:'N/A'},
+{id:'ss4',name:'Emergency escape signs clearly visible',legal:'H&S (Safety Signs & Signals) Regs 1996, RR(FS)O 2005',cert:'N/A'},
+{id:'ss5',name:'Traffic management signs in place',legal:'H&S (Safety Signs & Signals) Regs 1996',cert:'N/A'}]},
+{id:'supervision',name:'Site Supervision, Competence & Training',items:[
+{id:'sup1',name:'Competent site supervisor present',legal:'CDM 2015 Reg 8, MHSWR 1999 Reg 7',cert:'SSSTS / SMSTS'},
+{id:'sup2',name:'Training records available and current',legal:'MHSWR 1999 Reg 13, CDM 2015 Reg 8',cert:'N/A'},
+{id:'sup3',name:'All operatives competent for tasks being undertaken',legal:'CDM 2015 Reg 8',cert:'Relevant trade qualification'},
+{id:'sup4',name:'Apprentices and young workers appropriately supervised',legal:'MHSWR 1999 Reg 19, CDM 2015',cert:'N/A'},
+{id:'sup5',name:'Site manager available and contactable',legal:'CDM 2015 Reg 12',cert:'SMSTS'}]},
+{id:'sustain',name:'Sustainability & Environmental Impact',items:[
+{id:'sus1',name:'Environmental management plan in place',legal:'Environmental Protection Act 1990',cert:'N/A'},
+{id:'sus2',name:'Waste minimisation measures implemented',legal:'Environmental Protection Act 1990',cert:'N/A'},
+{id:'sus3',name:'Recycling facilities available on site',legal:'Environmental Protection Act 1990',cert:'N/A'},
+{id:'sus4',name:'Carbon reduction measures in place',legal:'Climate Change Act 2008',cert:'N/A'},
+{id:'sus5',name:'Water conservation measures implemented',legal:'Water Resources Act 1991',cert:'N/A'}]},
+{id:'tempworks',name:'Temporary Works',items:[
+{id:'tw1',name:'Temporary works coordinator appointed',legal:'BS 5975:2019, CDM 2015',cert:'Temporary Works Coordinator'},
+{id:'tw2',name:'Temporary works design approved by engineer',legal:'BS 5975:2019',cert:'Chartered Engineer'},
+{id:'tw3',name:'Temporary works inspected before use',legal:'BS 5975:2019, CDM 2015 Reg 22',cert:'Competent Person'},
+{id:'tw4',name:'Propping and shoring in good condition',legal:'BS 5975:2019, CDM 2015',cert:'N/A'},
+{id:'tw5',name:'Permit to load and strike issued where required',legal:'BS 5975:2019',cert:'N/A'}]},
+{id:'plant',name:'Tools, Plant & Equipment',items:[
+{id:'pl1',name:'Pre-use inspections completed on all plant',legal:'PUWER 1998 Reg 6',cert:'N/A'},
+{id:'pl2',name:'Plant operators trained and certificated',legal:'PUWER 1998 Reg 9',cert:'CPCS / NPORS'},
+{id:'pl3',name:'Defective tools removed from service',legal:'PUWER 1998 Reg 4',cert:'N/A'},
+{id:'pl4',name:'Guards in place on all machinery',legal:'PUWER 1998 Reg 11',cert:'N/A'},
+{id:'pl5',name:'LOLER thorough examination records available',legal:'LOLER 1998 Reg 9',cert:'N/A'},
+{id:'pl6',name:'Plant segregated from pedestrians',legal:'PUWER 1998, CDM 2015',cert:'N/A'}]},
+{id:'traffic',name:'Traffic & Vehicle Movement',items:[
+{id:'tr1',name:'Traffic management plan in place',legal:'CDM 2015 Reg 22, Workplace Regs 1992 Reg 17',cert:'N/A'},
+{id:'tr2',name:'Pedestrian and vehicle routes segregated',legal:'Workplace Regs 1992 Reg 17, CDM 2015',cert:'N/A'},
+{id:'tr3',name:'Banksman or signaller in use during vehicle movements',legal:'PUWER 1998, CDM 2015',cert:'Banksman'},
+{id:'tr4',name:'Speed limits enforced on site',legal:'CDM 2015, Road Traffic Act 1988',cert:'N/A'},
+{id:'tr5',name:'Reversing vehicles managed safely',legal:'Workplace Regs 1992 Reg 17',cert:'N/A'}]},
+{id:'weather',name:'Weather Preparedness',items:[
+{id:'wp1',name:'Weather forecast checked and communicated to team',legal:'MHSWR 1999 Reg 3',cert:'N/A'},
+{id:'wp2',name:'High wind protocols in place for work at height',legal:'WAH Regs 2005 Reg 4',cert:'N/A'},
+{id:'wp3',name:'Cold weather and frost controls implemented',legal:'MHSWR 1999',cert:'N/A'},
+{id:'wp4',name:'Hot weather controls in place -- sun protection and hydration',legal:'HSWA 1974 s.2',cert:'N/A'},
+{id:'wp5',name:'Lightning protection protocol in place',legal:'MHSWR 1999, WAH Regs 2005',cert:'N/A'}]},
+{id:'welfare',name:'Welfare Provisions',items:[
+{id:'wf1',name:'Toilets available, clean and adequate in number',legal:'CDM 2015 Sch 2, Workplace Regs 1992 Reg 20',cert:'N/A'},
+{id:'wf2',name:'Drinking water available and clearly identified',legal:'CDM 2015 Sch 2, Workplace Regs 1992 Reg 22',cert:'N/A'},
+{id:'wf3',name:'Rest facilities available with seating',legal:'CDM 2015 Sch 2, Workplace Regs 1992 Reg 25',cert:'N/A'},
+{id:'wf4',name:'Changing and drying facilities available',legal:'CDM 2015 Sch 2, Workplace Regs 1992 Reg 23',cert:'N/A'},
+{id:'wf5',name:'Facilities for warming food and drink',legal:'CDM 2015 Sch 2, Workplace Regs 1992 Reg 25',cert:'N/A'}]},
+{id:'workerwel',name:'Worker Welfare (Additional)',items:[
+{id:'wwa1',name:'No evidence of modern slavery or labour exploitation',legal:'Modern Slavery Act 2015',cert:'N/A'},
+{id:'wwa2',name:'Workers paid at least National Minimum Wage',legal:'National Minimum Wage Act 1998',cert:'N/A'},
+{id:'wwa3',name:'No workers under 18 carrying out high-risk activities',legal:'MHSWR 1999 Reg 19',cert:'N/A'},
+{id:'wwa4',name:'Workers aware of their rights and how to raise concerns',legal:'Employment Rights Act 1996',cert:'N/A'}]},
+{id:'workinghrs',name:'Working Hours & Fatigue Monitoring',items:[
+{id:'wh1',name:'Working hours records maintained',legal:'Working Time Regs 1998 Reg 9',cert:'N/A'},
+{id:'wh2',name:'No workers exceeding 48-hour weekly limit without opt-out',legal:'Working Time Regs 1998 Reg 4',cert:'N/A'},
+{id:'wh3',name:'Rest breaks provided -- 20 mins per 6 hours',legal:'Working Time Regs 1998 Reg 12',cert:'N/A'},
+{id:'wh4',name:'Night workers health assessed',legal:'Working Time Regs 1998 Reg 7',cert:'N/A'},
+{id:'wh5',name:'No evidence of fatigue affecting safety',legal:'HSWA 1974 s.2, MHSWR 1999',cert:'N/A'}]},
+{id:'wah',name:'Working at Height',items:[
+{id:'wah1',name:'Work at height risk assessment completed',legal:'WAH Regs 2005 Reg 6',cert:'N/A'},
+{id:'wah2',name:'Scaffold inspected and handover certificate available',legal:'WAH Regs 2005 Reg 12, BS EN 12811',cert:'CISRS'},
+{id:'wah3',name:'Edge protection in place at all open edges',legal:'WAH Regs 2005 Reg 6, Sch 2',cert:'N/A'},
+{id:'wah4',name:'Fragile surfaces marked and protected',legal:'WAH Regs 2005 Reg 9, Sch 6',cert:'N/A'},
+{id:'wah5',name:'Harnesses inspected and in use where required',legal:'WAH Regs 2005 Reg 6, PPEWR 1992',cert:'Working at Height'},
+{id:'wah6',name:'Ladders correctly used and secured',legal:'WAH Regs 2005 Reg 6, Sch 6',cert:'N/A'},
+{id:'wah7',name:'Rescue plan in place for work at height',legal:'WAH Regs 2005 Reg 4',cert:'N/A'}]},
+{id:'office',name:'Office & Depot Safety',items:[
+{id:'of1',name:'DSE assessments completed for all VDU users',legal:'H&S (DSE) Regs 1992 Reg 2',cert:'N/A'},
+{id:'of2',name:'Fire exits clear and emergency procedures displayed',legal:'RR(FS)O 2005 Art 14',cert:'N/A'},
+{id:'of3',name:'Electrical equipment PAT tested and in good condition',legal:'EaWR 1989, PUWER 1998',cert:'N/A'},
+{id:'of4',name:'Slips, trips and falls hazards controlled',legal:'Workplace Regs 1992 Reg 12',cert:'N/A'},
+{id:'of5',name:'Racking and storage secure with no overloading',legal:'Workplace Regs 1992, PUWER 1998',cert:'N/A'},
+{id:'of6',name:'Depot traffic management in place',legal:'Workplace Regs 1992 Reg 17',cert:'N/A'},
+{id:'of7',name:'Adequate ventilation and temperature control',legal:'Workplace Regs 1992 Reg 6 and 7',cert:'N/A'}]},
+{id:'lone',name:'Lone Working',items:[
+{id:'lw1',name:'Lone working risk assessment completed',legal:'MHSWR 1999 Reg 3',cert:'N/A'},
+{id:'lw2',name:'Check-in and check-out system in place for lone workers',legal:'HSWA 1974 s.2, MHSWR 1999',cert:'N/A'},
+{id:'lw3',name:'Lone worker alarm or device available',legal:'MHSWR 1999 Reg 8',cert:'N/A'}]},
+{id:'subcon',name:'Subcontractor Management',items:[
+{id:'sm1',name:'Subcontractor pre-qualification checks completed',legal:'CDM 2015 Reg 8',cert:'N/A'},
+{id:'sm2',name:'Subcontractor RAMS reviewed and approved',legal:'CDM 2015 Reg 12, MHSWR 1999 Reg 3',cert:'N/A'},
+{id:'sm3',name:'Subcontractor insurance current and adequate',legal:'Employers Liability (Compulsory Insurance) Act 1969',cert:'N/A'},
+{id:'sm4',name:'Subcontractor activities coordinated with principal works',legal:'CDM 2015 Reg 13',cert:'N/A'}]},
+{id:'permits',name:'Permits to Work',items:[
+{id:'ptw1',name:'Permit to work system in place for high-risk activities',legal:'HSWA 1974 s.2, EaWR 1989',cert:'N/A'},
+{id:'ptw2',name:'Current permits displayed at point of work',legal:'HSWA 1974 s.2',cert:'N/A'},
+{id:'ptw3',name:'Permits signed off by authorised person',legal:'HSWA 1974, EaWR 1989 Reg 12',cert:'Authorised Person'},
+{id:'ptw4',name:'Permit closure procedure followed',legal:'HSWA 1974 s.2',cert:'N/A'}]}
+];
+
+let iType=null,iSub=null,gLat=null,gLng=null,addr='',sigSigned=false,iRef='';
+let timerStart=null,timerInterval=null,inspectionDuration='';
+
+document.addEventListener('DOMContentLoaded',function(){
+  var n=new Date();
+  var dtEl=document.getElementById('ins-date');
+  var tmEl=document.getElementById('ins-time');
+  if(dtEl) dtEl.value=n.toISOString().split('T')[0];
+  if(tmEl) tmEl.value=n.toTimeString().slice(0,5);
+  var sdEl=document.getElementById('sub-dt');
+  if(sdEl) sdEl.value=n.toLocaleString('en-GB');
+  getLocation();
+});
+
+function selType(t){
+  iType=t;
+  ['construction','depot'].forEach(function(x){
+    var el=document.getElementById('tb-'+x);
+    if(el) el.classList.toggle('sel',x===t);
+  });
+  var sc=document.getElementById('st-construction');
+  var sd=document.getElementById('st-depot');
+  if(sc) sc.style.display=t==='construction'?'block':'none';
+  if(sd) sd.style.display=t==='depot'?'block':'none';
+  iSub=null;
+  ['pc','sub','present','absent'].forEach(function(x){
+    var el=document.getElementById('sb-'+x);
+    if(el) el.classList.remove('sel');
+  });
+}
+
+function selSub(s){
+  iSub=s;
+  var map={pc:'sb-pc',subcontractor:'sb-sub','manager-present':'sb-present','manager-absent':'sb-absent'};
+  Object.values(map).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.classList.remove('sel');
+  });
+  var t=map[s];
+  if(t){var el=document.getElementById(t);if(el)el.classList.add('sel');}
+}
+
+function getLocation(){
+  if(!navigator.geolocation){
+    var la=document.getElementById('loc-addr');
+    if(la) la.textContent='Enter manually';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function(pos){
+    gLat=pos.coords.latitude;
+    gLng=pos.coords.longitude;
+    var lc=document.getElementById('loc-coords');
+    if(lc) lc.textContent=' . '+gLat.toFixed(5)+', '+gLng.toFixed(5);
+    fetch('https://nominatim.openstreetmap.org/reverse?lat='+gLat+'&lon='+gLng+'&format=json')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var a=d.address;
+        var disp=((a.house_number||'')+' '+(a.road||'')+', '+(a.city||a.town||a.village||'')).trim().replace(/^,|,$/g,'');
+        var la=document.getElementById('loc-addr');
+        var sa=document.getElementById('site-addr');
+        if(la) la.textContent=disp;
+        if(sa) sa.value=disp;
+        addr=disp;
+      }).catch(function(){});
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+gLat+'&longitude='+gLng+'&current=temperature_2m,wind_speed_10m,weather_code&wind_speed_unit=mph')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var c=d.current;
+        var wt=document.getElementById('wtemp');
+        var ww=document.getElementById('wwind');
+        var wd=document.getElementById('wdesc');
+        if(wt) wt.textContent=Math.round(c.temperature_2m);
+        if(ww) ww.textContent=Math.round(c.wind_speed_10m);
+        var wmap={0:'Clear',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',61:'Light rain',63:'Rain',65:'Heavy rain',80:'Showers',95:'Thunderstorm'};
+        if(wd) wd.textContent=wmap[c.weather_code]||'Variable';
+      }).catch(function(){});
+  },function(){
+    var la=document.getElementById('loc-addr');
+    if(la) la.textContent='Location denied -- enter manually';
+  },{timeout:10000});
+}
+
+function startInspection(){
+  if(!iType){alert('Please select an inspection type.');return;}
+  if(!iSub){alert('Please select inspection role or manager status.');return;}
+  var sn=document.getElementById('site-name');
+  if(!sn||!sn.value.trim()){alert('Please enter the site or depot name.');return;}
+  var ins=document.getElementById('inspector');
+  if(!ins||!ins.value.trim()){alert('Please enter your name.');return;}
+  iRef='INS-'+Date.now().toString(36).toUpperCase();
+  var tl=iType==='construction'?'Construction Site':'Depot/Office';
+  var sm={pc:'Principal Contractor',subcontractor:'Subcontractor','manager-present':'Manager Present','manager-absent':'Manager Absent'};
+  var hsub=document.getElementById('hsub');
+  if(hsub) hsub.textContent=tl+' . '+sm[iSub];
+  buildSections();
+  showPage('pg-inspection');
+  updateOverall();
+  var sbw = document.getElementById('search-bar-wrap');
+  if(sbw) sbw.style.display = 'block';
+  var sb = document.getElementById('section-search');
+  if(sb) sb.value = '';
+  timerStart=Date.now();
+  var td=document.getElementById('timer-display');
+  if(td) td.style.display='block';
+  timerInterval=setInterval(function(){
+    var elapsed=Date.now()-timerStart;
+    var h=Math.floor(elapsed/3600000).toString().padStart(2,'0');
+    var m=Math.floor((elapsed%3600000)/60000).toString().padStart(2,'0');
+    var s=Math.floor((elapsed%60000)/1000).toString().padStart(2,'0');
+    var tv=document.getElementById('timer-val');
+    if(tv) tv.textContent=h+':'+m+':'+s;
+  },1000);
+}
+
+function buildSections(){
+  var cont=document.getElementById('sec-container');
+  if(!cont) return;
+  cont.innerHTML='';
+  SECTIONS.forEach(function(sec){
+    var d=document.createElement('div');
+    d.className='scard';
+    d.id='sec-'+sec.id;
+    var hdr=document.createElement('div');
+    hdr.className='shdr';
+    hdr.id='shdr-'+sec.id;
+    (function(sid){hdr.onclick=function(){togSec(sid);};})(sec.id);
+    hdr.innerHTML='<div><div class="sname">'+sec.name+'</div><div class="sslabel" id="ssl-'+sec.id+'">Category Score: --</div></div><div class="sarrow" id="sarr-'+sec.id+'">v</div>';
+    var bdy=document.createElement('div');
+    bdy.className='sbody';
+    bdy.id='sbdy-'+sec.id;
+    bdy.innerHTML=sec.items.map(function(it){return buildItem(it,sec.id);}).join('');
+    d.appendChild(hdr);
+    d.appendChild(bdy);
+    cont.appendChild(d);
+  });
+}
+
+function buildItem(it,sid){
+  var opts=OBS_OPTIONS.map(function(o){return '<option value="'+o+'">'+o+'</option>';}).join('');
+  var h='<div class="icard" id="icard-'+it.id+'">';
+  h+='<div class="ihdr"><div class="iname">'+it.name+'</div>';
+  h+='<div class="ilegal">Legal: '+it.legal+'</div>';
+  h+='<div class="icert">Required Certification: '+it.cert+'</div></div>';
+  h+='<div class="ibody">';
+  // PHOTO FIRST - directly under title/regs/cert
+  h+='<div class="pharea"><div class="phrow">';
+  h+='<button class="phbtn" data-item="'+it.id+'" data-sec="'+sid+'" onclick="trigPhoto(this.dataset.item)">📷 Take Photo</button>';
+  h+='<span style="font-size:12px;color:#9ca3af;flex:1">AI assesses photo and suggests score, observation and legislation</span>';
+  h+='<img id="prev-'+it.id+'" class="phprev"></div>';
+  h+='<input type="file" id="phi-'+it.id+'" accept="image/*" capture="environment" style="display:none" data-item="'+it.id+'" data-sec="'+sid+'" onchange="doPhoto(this.dataset.item,this.dataset.sec,this)">';
+  h+='<div class="aiload" id="ail-'+it.id+'">🤖 Claude is assessing the image...</div>';
+  h+='<div class="airesult" id="air-'+it.id+'">';
+  h+='<div class="airesult-title">🤖 AI Assessment - Review and accept or override</div>';
+  h+='<p><strong>Observation:</strong> <span id="ai-ob-'+it.id+'"></span></p>';
+  h+='<p><strong>Suggested Score:</strong> <span id="ai-sc-'+it.id+'"></span></p>';
+  h+='<p><strong>Legislation Breached:</strong> <span id="ai-lg-'+it.id+'"></span></p>';
+  h+='<p><strong>ISO 45001:</strong> <span id="ai-iso-'+it.id+'"></span></p>';
+  h+='</div></div>';
+  // SCORE
+  h+='<div class="ifield" style="margin-top:10px"><label>Score</label>';
+  h+='<select class="sselect" id="sc-'+it.id+'" data-item="'+it.id+'" data-sec="'+sid+'" onchange="updStyle(this.dataset.item);updSec(this.dataset.sec);updateOverall()">';
+  h+='<option value="">Select score...</option>';
+  h+='<option value="outstanding">Outstanding (100%)</option>';
+  h+='<option value="compliant">Compliant (80%)</option>';
+  h+='<option value="satisfactory">Satisfactory (60%)</option>';
+  h+='<option value="noncompliant">Non-Compliant (20%)</option>';
+  h+='<option value="negligent">Negligent (0%)</option>';
+  h+='<option value="na">N/A</option>';
+  h+='</select></div>';
+  // OBSERVATION
+  h+='<div class="ifield"><label>Observation</label>';
+  h+='<select id="ob-'+it.id+'" style="font-size:13px;padding:7px 10px;width:100%;border:1.5px solid #e5e7eb;border-radius:6px;appearance:none;background:#fff">';
+  h+='<option value="">Select observation...</option>'+opts+'</select></div>';
+  // DETAILS
+  h+='<div class="ifield"><label>Details of Issue / Remedial Action</label>';
+  h+='<textarea id="det-'+it.id+'" rows="2" style="font-size:13px;padding:7px 10px" placeholder="Describe the issue and remedial action required..."></textarea></div>';
+  // ISO
+  h+='<div class="ifield"><label>ISO 45001 Clause</label>';
+  h+='<input type="text" id="iso-'+it.id+'" style="font-size:13px;padding:7px 10px" placeholder="Auto-filled by AI or enter manually..."></div>';
+  h+='</div></div>';
+  return h;
+}
+
+
+function togSec(id){
+  var b=document.getElementById('sbdy-'+id);
+  var a=document.getElementById('sarr-'+id);
+  var hh=document.getElementById('shdr-'+id);
+  if(!b) return;
+  var o=b.classList.contains('open');
+  b.classList.toggle('open',!o);
+  if(a) a.classList.toggle('open',!o);
+  if(hh) hh.classList.toggle('open',!o);
+}
+
+function updStyle(id){
+  var s=document.getElementById('sc-'+id);
+  if(!s) return;
+  s.className='sselect'+(s.value?' sc-'+s.value:'');
+}
+
+function secScore(sid){
+  var sec=SECTIONS.find(function(s){return s.id===sid;});
+  if(!sec) return null;
+  var tot=0,mx=0;
+  sec.items.forEach(function(it){
+    var el=document.getElementById('sc-'+it.id);
+    if(!el||!el.value||el.value==='na') return;
+    var v=SCORES[el.value];
+    if(v!==null&&v!==undefined){tot+=v;mx+=100;}
+  });
+  return mx===0?null:Math.round((tot/mx)*100);
+}
+
+function updSec(sid){
+  var p=secScore(sid);
+  var lbl=document.getElementById('ssl-'+sid);
+  if(!lbl) return;
+  if(p===null){lbl.textContent='Category Score: --';lbl.className='sslabel';return;}
+  var cl=sClass(p).cl;
+  lbl.textContent='Category Score: '+p+'%';
+  lbl.className='sslabel '+cl;
+}
+
+function updateOverall(){
+  var tot=0,mx=0;
+  SECTIONS.forEach(function(sec){
+    sec.items.forEach(function(it){
+      var el=document.getElementById('sc-'+it.id);
+      if(!el||!el.value||el.value==='na') return;
+      var v=SCORES[el.value];
+      if(v!==null&&v!==undefined){tot+=v;mx+=100;}
+    });
+  });
+  var el=document.getElementById('opct');
+  if(!el) return;
+  if(mx===0){el.textContent='--';el.className='opct c-purple';return;}
+  var p=Math.round((tot/mx)*100);
+  var cl=sClass(p).cl;
+  el.textContent=p+'%';
+  el.className='opct '+cl;
+}
+
+function sClass(p){
+  if(p>=90) return{cl:'c-purple'};
+  if(p>=70) return{cl:'c-green'};
+  if(p>=50) return{cl:'c-amber'};
+  if(p>=10) return{cl:'c-red'};
+  return{cl:'c-darkred'};
+}
+
+
+function doPhoto(itemId, secId, input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  // Show preview
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var prev = document.getElementById('prev-' + itemId);
+    if (prev) { prev.src = e.target.result; prev.style.display = 'block'; }
+    // Store for PDF embedding
+    photoStore[itemId] = { dataUrl: e.target.result, type: file.type };
+  };
+  reader.readAsDataURL(file);
+  // Send to AI
+  var b64reader = new FileReader();
+  b64reader.onload = function() {
+    var b64 = b64reader.result.split(',')[1];
+    runAIAssessment(itemId, secId, file, b64);
+  };
+  b64reader.readAsDataURL(file);
+}
+
+function trigPhoto(id){
+  var el=document.getElementById('phi-'+id);
+  if(el) el.click();
+}
+
+
+async function runAIAssessment(itemId, secId, file, b64) {
+  var al = document.getElementById('ail-' + itemId);
+  var ar = document.getElementById('air-' + itemId);
+  if (al) al.style.display = 'block';
+  if (ar) ar.style.display = 'none';
+  var sec = SECTIONS.find(function(s){ return s.id === secId; });
+  var item = sec ? sec.items.find(function(i){ return i.id === itemId; }) : null;
+  try {
+    console.log('Calling Anthropic API, key starts with:', ANTHROPIC_KEY.substring(0,10));
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: file.type, data: b64 } },
+            { type: 'text', text: 'You are an expert UK H&S inspector. Analyse this photo in context of: "' + (item ? item.name : 'H&S inspection') + '" Legal: ' + (item ? item.legal : 'HSWA 1974') + '. Respond ONLY in this exact JSON (no other text): {"observation":"what you see relevant to H&S (max 20 words)","suggested_score":"outstanding|compliant|satisfactory|noncompliant|negligent","legislation_breached":"specific regs and sections breached or No breach observed","iso_45001_clause":"clause number and title e.g. 8.1.3 Management of change"}' }
+          ]
+        }]
+      })
+    });
+    var dat = await resp.json();
+    var txt = dat.content[0].text;
+    var res = JSON.parse(txt.replace(/```json|```/g, '').trim());
+    var smap = { outstanding: 'Outstanding (100%)', compliant: 'Compliant (80%)', satisfactory: 'Satisfactory (60%)', noncompliant: 'Non-Compliant (20%)', negligent: 'Negligent (0%)' };
+    var aob = document.getElementById('ai-ob-' + itemId);
+    var asc = document.getElementById('ai-sc-' + itemId);
+    var alg = document.getElementById('ai-lg-' + itemId);
+    var ais = document.getElementById('ai-iso-' + itemId);
+    if (aob) aob.textContent = res.observation || 'No observation';
+    if (asc) asc.textContent = smap[res.suggested_score] || res.suggested_score || 'Unknown';
+    if (alg) alg.textContent = res.legislation_breached || 'None identified';
+    if (ais) ais.textContent = res.iso_45001_clause || 'Not identified';
+    var scel = document.getElementById('sc-' + itemId);
+    if (scel && res.suggested_score) { scel.value = res.suggested_score; updStyle(itemId); updSec(secId); updateOverall(); }
+    var obel = document.getElementById('ob-' + itemId);
+    if (obel && res.observation) obel.value = res.observation;
+    var isoel = document.getElementById('iso-' + itemId);
+    if (isoel && res.iso_45001_clause) isoel.value = res.iso_45001_clause;
+    if (ar) ar.style.display = 'block';
+  } catch(e) {
+    console.error('AI assessment error:', e);
+    var aob2 = document.getElementById('ai-ob-' + itemId);
+    if (aob2) aob2.textContent = 'AI error: ' + (e.message || e.toString());
+    if (ar) ar.style.display = 'block';
+  }
+  if (al) al.style.display = 'none';
+}
+
+// ============================================================
+
+// CATEGORY GROUPINGS
+var CATEGORIES = [
+  {id:'management', name:'Site Management & Documentation', sections:['docs','supervision','digitalrep','digitalsys','subcon','permits']},
+  {id:'site-conditions', name:'Site Conditions & Security', sections:['access','boundary','signage','housekeeping','lighting','traffic','weather']},
+  {id:'health-welfare', name:'Health, Safety & Welfare', sections:['firstaid','fire','welfare','workerwel','workinghrs','mentalh','occhealth','inclusion']},
+  {id:'work-activities', name:'Work Activities & Equipment', sections:['wah','lifting','excav','hotworks','tempworks','mh','confined','demolition','plant']},
+  {id:'hazards-env', name:'Health Hazards & Environment', sections:['coshh','noise','asbestos','env','sustain','ppe']},
+  {id:'compliance', name:'Systems & Compliance', sections:['electrical','comms','lone','office']}
+];
+
+function getCategoryScore(cat) {
+  var tot=0, mx=0;
+  cat.sections.forEach(function(sid) {
+    var sec=SECTIONS.find(function(s){return s.id===sid;});
+    if(!sec) return;
+    sec.items.forEach(function(it) {
+      var el=document.getElementById('sc-'+it.id);
+      if(!el||!el.value||el.value==='na') return;
+      var v=SCORES[el.value];
+      if(v!==null&&v!==undefined){tot+=v;mx+=100;}
+    });
+  });
+  return mx===0?null:Math.round((tot/mx)*100);
+}
+
+function getScoreLabel(p) {
+  if(p===null) return{label:'Not Scored',color:'#9ca3af'};
+  if(p>=90) return{label:'Outstanding',color:'#7c3aed'};
+  if(p>=70) return{label:'Compliant',color:'#16a34a'};
+  if(p>=50) return{label:'Satisfactory',color:'#d97706'};
+  if(p>=10) return{label:'Non-Compliant',color:'#dc2626'};
+  return{label:'Negligent',color:'#7f1d1d'};
+}
+
+var photoStore = {};
+
+// REVIEW PAGE
+// ============================================================
+function showReview() {
+  var ov = document.getElementById('opct').textContent;
+  document.getElementById('rev-overall').textContent = ov;
+  document.getElementById('rev-overall').style.color = ov !== '--' ? getScoreLabel(parseInt(ov)).color : '#9ca3af';
+
+  // Build category scores
+  var catHTML = '';
+  CATEGORIES.forEach(function(cat) {
+    var p = getCategoryScore(cat);
+    var sl = getScoreLabel(p);
+    var pct = p !== null ? p : 0;
+    catHTML += '<div style="margin-bottom:14px">';
+    catHTML += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+    catHTML += '<div style="font-size:13px;font-weight:700">' + cat.icon + ' ' + cat.name + '</div>';
+    catHTML += '<div style="font-size:13px;font-weight:800;color:' + sl.color + '">' + (p !== null ? p + '%' : 'N/A') + '</div>';
+    catHTML += '</div>';
+    catHTML += '<div style="background:#f3f4f6;border-radius:4px;height:8px;overflow:hidden">';
+    catHTML += '<div style="width:' + pct + '%;height:100%;background:' + sl.color + ';border-radius:4px;transition:width 0.5s"></div>';
+    catHTML += '</div>';
+    catHTML += '<div style="font-size:11px;color:' + sl.color + ';font-weight:600;margin-top:2px">' + sl.label + '</div>';
+    catHTML += '</div>';
+  });
+  document.getElementById('rev-categories').innerHTML = catHTML;
+
+  // Build findings - only non-compliant, negligent, satisfactory
+  var findHTML = '';
+  var findCount = 0;
+  SECTIONS.forEach(function(sec) {
+    sec.items.forEach(function(it) {
+      var sel = document.getElementById('sc-' + it.id);
+      var sv = sel ? sel.value : '';
+      if (!sv || sv === 'outstanding' || sv === 'compliant' || sv === 'na' || sv === '') return;
+      var ob = document.getElementById('ob-' + it.id);
+      var det = document.getElementById('det-' + it.id);
+      var ph = photoStore[it.id];
+      var scoreColors = { satisfactory: '#d97706', noncompliant: '#dc2626', negligent: '#7f1d1d' };
+      var scoreLabels = { satisfactory: 'Satisfactory', noncompliant: 'Non-Compliant', negligent: 'Negligent' };
+      findHTML += '<div style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;overflow:hidden">';
+      findHTML += '<div style="background:' + (scoreColors[sv]||'#9ca3af') + ';padding:8px 12px;color:#fff;font-size:12px;font-weight:700;display:flex;justify-content:space-between">';
+      findHTML += '<span>' + it.name + '</span><span>' + (scoreLabels[sv]||sv) + '</span></div>';
+      findHTML += '<div style="padding:10px 12px;font-size:12px">';
+      if (ph) findHTML += '<img src="' + ph.dataUrl + '" style="width:100%;max-height:180px;object-fit:cover;border-radius:4px;margin-bottom:8px">';
+      if (ob && ob.value) findHTML += '<div style="margin-bottom:4px"><strong>Observation:</strong> ' + ob.value + '</div>';
+      if (det && det.value) findHTML += '<div><strong>Remedial Action:</strong> ' + det.value + '</div>';
+      findHTML += '</div></div>';
+      findCount++;
+    });
+  });
+  if (findCount === 0) findHTML = '<div style="text-align:center;color:#16a34a;font-weight:700;padding:20px">No significant findings recorded</div>';
+  document.getElementById('rev-findings').innerHTML = findHTML;
+
+  showPage('pg-review');
+}
+
+// ============================================================
+// SIGNATURES
+// ============================================================
+var repSigSigned = false;
+
+function showSignatures() {
+  var sdt = document.getElementById('sub-dt');
+  if (sdt) sdt.value = new Date().toLocaleString('en-GB');
+  showPage('pg-submit');
+  setTimeout(function() { initRepSig(); initSig(); }, 100);
+}
+
+function initRepSig() {
+  var c = document.getElementById('rep-sig');
+  if (!c) return;
+  var r = c.getBoundingClientRect();
+  c.width = r.width || 600; c.height = 100;
+  var ctx = c.getContext('2d');
+  ctx.strokeStyle = '#1e2a38'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  var dr = false;
+  function gp(e) { var rr = c.getBoundingClientRect(); var s = e.touches ? e.touches[0] : e; return { x: s.clientX - rr.left, y: s.clientY - rr.top }; }
+  function st(e) { e.preventDefault(); dr = true; var p = gp(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+  function dw(e) { e.preventDefault(); if (!dr) return; var p = gp(e); ctx.lineTo(p.x, p.y); ctx.stroke(); repSigSigned = true; }
+  function sp(e) { e.preventDefault(); dr = false; }
+  c.addEventListener('mousedown', st); c.addEventListener('mousemove', dw); c.addEventListener('mouseup', sp); c.addEventListener('mouseleave', sp);
+  c.addEventListener('touchstart', st, { passive: false }); c.addEventListener('touchmove', dw, { passive: false }); c.addEventListener('touchend', sp, { passive: false });
+}
+
+function clrRepSig() {
+  var c = document.getElementById('rep-sig');
+  if (!c) return;
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  repSigSigned = false;
+}
+
+
+function initSig(){
+  var c=document.getElementById('ins-sig');
+  if(!c) return;
+  var r=c.getBoundingClientRect();
+  c.width=r.width||600;c.height=100;
+  var ctx=c.getContext('2d');
+  ctx.strokeStyle='#1e2a38';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+  var dr=false;
+  function gp(e){var rr=c.getBoundingClientRect();var s=e.touches?e.touches[0]:e;return{x:s.clientX-rr.left,y:s.clientY-rr.top};}
+  function st(e){e.preventDefault();dr=true;var p=gp(e);ctx.beginPath();ctx.moveTo(p.x,p.y);}
+  function dw(e){e.preventDefault();if(!dr)return;var p=gp(e);ctx.lineTo(p.x,p.y);ctx.stroke();sigSigned=true;}
+  function sp(e){e.preventDefault();dr=false;}
+  c.addEventListener('mousedown',st);c.addEventListener('mousemove',dw);c.addEventListener('mouseup',sp);c.addEventListener('mouseleave',sp);
+  c.addEventListener('touchstart',st,{passive:false});c.addEventListener('touchmove',dw,{passive:false});c.addEventListener('touchend',sp,{passive:false});
+}
+
+function clrSig(){
+  var c=document.getElementById('ins-sig');
+  if(!c) return;
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  sigSigned=false;
+}
+
+async function submitInspection(){
+  var repName = document.getElementById('rep-name');
+  var repTitle = document.getElementById('rep-title');
+  if (!repName || !repName.value.trim()) { alert('Please enter the site representative name.'); return; }
+  if (!repTitle || !repTitle.value.trim()) { alert('Please enter the site representative job title.'); return; }
+  if (!repSigSigned) { alert('Site representative signature is required.'); return; }
+  var decl = document.getElementById('ins-decl');
+  if (!decl || !decl.checked) { alert('Please confirm the inspector declaration.'); return; }
+  if (!sigSigned) { alert('Inspector signature is required.'); return; }
+  var btn = document.querySelector('#pg-submit .bsub');
+  if (btn) { btn.textContent = 'Generating Report...'; btn.disabled = true; }
+  var ov = document.getElementById('opct').textContent;
+  var sn = document.getElementById('site-name').value;
+  var subtypeMap = { pc: 'Principal Contractor', subcontractor: 'Subcontractor', 'manager-present': 'Manager Present', 'manager-absent': 'Manager Absent' };
+  var tl = iType === 'construction' ? 'Construction Site' : 'Depot/Office';
+  var insDate = document.getElementById('ins-date') ? document.getElementById('ins-date').value : new Date().toLocaleDateString('en-GB');
+  var insTime = document.getElementById('ins-time') ? document.getElementById('ins-time').value : new Date().toTimeString().slice(0,5);
+  var data = {
+    Timestamp: new Date().toLocaleString('en-GB'), Reference: iRef, 'Assessment Type': 'INSPECTION',
+    'Inspection Type': tl, Subtype: subtypeMap[iSub] || '', 'Site Name': sn,
+    'Site Address': document.getElementById('site-addr').value,
+    F10: document.getElementById('f10').value,
+    GPS: gLat ? gLat.toFixed(5) + ', ' + gLng.toFixed(5) : '',
+    Client: document.getElementById('client').value,
+    PC: document.getElementById('pc-name').value,
+    CPM: document.getElementById('cpm').value,
+    CSM: document.getElementById('csm').value,
+    'Ops PAYE': document.getElementById('ops-paye').value,
+    'Ops Sole': document.getElementById('ops-sole').value,
+    Inspector: document.getElementById('inspector').value,
+    Tasks: document.getElementById('tasks').value,
+    'Inspection Date': insDate, 'Start Time': insTime,
+    Duration: inspectionDuration, 'Overall Score': ov,
+    'Site Rep': repName.value, 'Safe to Proceed': ov, 'Supervisor Declaration': 'Confirmed'
+  };
+  SECTIONS.forEach(function(s) { var p = secScore(s.id); data[s.name] = p !== null ? p + '%' : 'N/A'; });
+  try {
+    await fetch(SHEETDB, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: [data] }) });
+    emailjs.init(EJK);
+    await emailjs.send(EJS, EJT, {
+      reference: iRef, assessment_type: 'INSPECTION - ' + tl + ' - ' + subtypeMap[iSub],
+      timestamp: new Date().toLocaleString('en-GB'),
+      site_address: sn + ' - ' + document.getElementById('site-addr').value,
+      supervisor_name: document.getElementById('inspector').value,
+      job_number: document.getElementById('f10').value || iRef,
+      customer_name: document.getElementById('client').value,
+      start_date: insDate, end_date: insTime, duration: inspectionDuration,
+      operatives: 'PAYE: ' + (document.getElementById('ops-paye').value || 0) + ' Sole: ' + (document.getElementById('ops-sole').value || 0),
+      wind_speed: document.getElementById('wwind').textContent,
+      temperature: document.getElementById('wtemp').textContent,
+      weather_conditions: document.getElementById('wdesc').textContent,
+      overhead_cables: 'N/A', resident_home: 'N/A', safe_to_proceed: ov,
+      battery_included: 'N/A', lps_included: 'N/A', excavation_required: 'N/A',
+      new_hazards: document.getElementById('tasks').value,
+      gps_coordinates: gLat ? gLat.toFixed(5) + ', ' + gLng.toFixed(5) : 'N/A'
+    });
+  } catch(e) { console.log('Submit error:', e); }
+  genPDF(data, ov);
+  var sr = document.getElementById('suc-ref'); var ss = document.getElementById('suc-score');
+  var sl2 = document.getElementById('suc-loc'); var st2 = document.getElementById('suc-time');
+  if (sr) sr.textContent = iRef; if (ss) ss.textContent = ov;
+  if (sl2) sl2.textContent = sn; if (st2) st2.textContent = new Date().toLocaleString('en-GB');
+  showPage('pg-success');
+}
+
+function gCol(p) {
+  if (p >= 90) return [124,58,237];
+  if (p >= 70) return [22,163,74];
+  if (p >= 50) return [217,119,6];
+  if (p >= 10) return [220,38,38];
+  return [127,29,29];
+}
+
+function genPDF(data, ov) {
+  var jsPDF2 = window.jspdf.jsPDF;
+  var doc = new jsPDF2({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  var sl=[30,42,56], pu=[124,58,237], gr=[150,150,150], bk=[30,30,30], wh=[255,255,255];
+  var W=210, M=14, CW=W-M*2; var y=0;
+
+  // -- COVER PAGE --
+  // Full dark header
+  doc.setFillColor(sl[0],sl[1],sl[2]); doc.rect(0,0,W,80,'F');
+  doc.setFillColor(pu[0],pu[1],pu[2]); doc.rect(0,0,W,6,'F');
+
+  // Logo area
+  doc.setTextColor(wh[0],wh[1],wh[2]);
+  doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('SAFETYSPHERE', M, 18);
+  doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.setTextColor(180,180,220);
+  doc.text('Health & Safety Management System', M, 23);
+
+  // Report title
+  doc.setTextColor(wh[0],wh[1],wh[2]);
+  doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('INSPECTION REPORT', M, 45);
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.setTextColor(200,200,220);
+  doc.text((data['Inspection Type'] || '') + '  |  ' + (data['Subtype'] || ''), M, 53);
+  doc.setFontSize(9);
+  doc.text(data['Site Name'] || '', M, 60);
+  doc.text(data['Inspection Date'] || '', M, 66);
+  doc.text('Inspector: ' + (data['Inspector'] || ''), M, 72);
+
+  // Overall score circle
+  var op = parseInt(ov) || 0;
+  var sc = gCol(op);
+  doc.setFillColor(sc[0],sc[1],sc[2]);
+  doc.circle(W-M-22, 48, 22, 'F');
+  doc.setTextColor(wh[0],wh[1],wh[2]);
+  doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text(ov, W-M-22, 50, { align: 'center' });
+  doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text('OVERALL', W-M-22, 56, { align: 'center' });
+  doc.text('SCORE', W-M-22, 60, { align: 'center' });
+
+  y = 88;
+
+  // Ref box
+  doc.setFillColor(245,245,250);
+  doc.rect(M, y, CW, 16, 'F');
+  doc.setTextColor(bk[0],bk[1],bk[2]);
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Reference: ' + (data['Reference'] || ''), M+4, y+5);
+  doc.text('GPS: ' + (data['GPS'] || 'N/A'), M+4, y+10);
+  doc.text('F10: ' + (data['F10'] || 'N/A'), M+80, y+5);
+  doc.text('Duration: ' + (data['Duration'] || 'N/A'), M+80, y+10);
+  doc.text('Client: ' + (data['Client'] || 'N/A'), M+4, y+15);
+  doc.text('Principal Contractor: ' + (data['PC'] || 'N/A'), M+80, y+15);
+  y += 22;
+
+  // Tasks
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(sl[0],sl[1],sl[2]);
+  doc.text('Tasks Undertaken:', M, y);
+  doc.setFont('helvetica','normal'); doc.setTextColor(bk[0],bk[1],bk[2]);
+  var taskLines = doc.splitTextToSize(data['Tasks'] || 'Not specified', CW-2);
+  doc.text(taskLines, M, y+5);
+  y += 5 + taskLines.length * 4.5 + 6;
+
+  // -- CATEGORY SCORES PAGE --
+  doc.addPage(); y = 14;
+
+  // Section header
+  doc.setFillColor(sl[0],sl[1],sl[2]); doc.rect(0,0,W,14,'F');
+  doc.setFillColor(pu[0],pu[1],pu[2]); doc.rect(0,0,W,3,'F');
+  doc.setTextColor(wh[0],wh[1],wh[2]); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('INSPECTION SUMMARY BY CATEGORY', M, 10);
+  y = 22;
+
+  // Overall score bar
+  doc.setFillColor(sc[0],sc[1],sc[2]); doc.rect(M, y, CW, 14, 'F');
+  doc.setTextColor(wh[0],wh[1],wh[2]); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text('Overall Score: ' + ov, M+4, y+10);
+  y += 20;
+
+  // Category bars
+  CATEGORIES.forEach(function(cat) {
+    var p = getCategoryScore(cat);
+    var pct = p !== null ? p : 0;
+    var sl2 = getScoreLabel(p);
+    var col = gCol(pct);
+
+    // Category row
+    doc.setFillColor(248,248,252);
+    doc.rect(M, y, CW, 18, 'F');
+    doc.setDrawColor(230,230,240);
+    doc.rect(M, y, CW, 18);
+
+    // Category name
+    doc.setTextColor(sl[0],sl[1],sl[2]); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text(cat.icon + ' ' + cat.name, M+3, y+6);
+
+    // Score label
+    doc.setTextColor(col[0],col[1],col[2]); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text((p !== null ? p + '%' : 'N/A') + ' -- ' + sl2.label, M+3, y+12);
+
+    // Progress bar background
+    doc.setFillColor(220,220,230); doc.rect(M+3, y+13.5, CW-6, 3, 'F');
+    // Progress bar fill
+    if (pct > 0) {
+      doc.setFillColor(col[0],col[1],col[2]);
+      doc.rect(M+3, y+13.5, (CW-6) * pct / 100, 3, 'F');
+    }
+    y += 22;
+  });
+
+  y += 4;
+
+  // Section detail table
+  doc.setFillColor(sl[0],sl[1],sl[2]); doc.rect(M, y, CW, 7, 'F');
+  doc.setTextColor(wh[0],wh[1],wh[2]); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text('INDIVIDUAL SECTION SCORES', M+3, y+5);
+  y += 10;
+
+  var colW = CW / 2;
+  var secCount = 0;
+  var startX = M;
+  SECTIONS.forEach(function(s) {
+    if (y > 270) { doc.addPage(); y = 14; startX = M; secCount = 0; }
+    var p = secScore(s.id);
+    var ps = p !== null ? p + '%' : 'N/A';
+    var col = p !== null ? gCol(p) : [180,180,180];
+    var xPos = startX + (secCount % 2) * colW;
+
+    doc.setFillColor(p !== null ? col[0] : 200, p !== null ? col[1] : 200, p !== null ? col[2] : 200);
+    doc.rect(xPos, y, 2, 5, 'F');
+    doc.setTextColor(bk[0],bk[1],bk[2]); doc.setFontSize(7); doc.setFont('helvetica','normal');
+    var sname = doc.splitTextToSize(s.name, colW-20);
+    doc.text(sname[0], xPos+5, y+4);
+    doc.setTextColor(col[0],col[1],col[2]); doc.setFont('helvetica','bold');
+    doc.text(ps, xPos+colW-8, y+4, { align: 'right' });
+
+    secCount++;
+    if (secCount % 2 === 0) { y += 8; }
+  });
+  if (secCount % 2 !== 0) y += 8;
+
+  // -- FINDINGS PAGES --
+  var hasFindings = false;
+  var pageHeaderPrinted = false;
+
+  SECTIONS.forEach(function(sec) {
+    sec.items.forEach(function(it) {
+      var sel = document.getElementById('sc-' + it.id);
+      var sv = sel ? sel.value : '';
+      if (!sv || sv === 'outstanding' || sv === 'compliant' || sv === 'na' || sv === '') return;
+
+      if (!pageHeaderPrinted) {
+        doc.addPage(); y = 14;
+        doc.setFillColor(sl[0],sl[1],sl[2]); doc.rect(0,0,W,14,'F');
+        doc.setFillColor(pu[0],pu[1],pu[2]); doc.rect(0,0,W,3,'F');
+        doc.setTextColor(wh[0],wh[1],wh[2]); doc.setFontSize(11); doc.setFont('helvetica','bold');
+        doc.text('FINDINGS -- ISSUES & OBSERVATIONS', M, 10);
+        y = 22;
+        pageHeaderPrinted = true;
+      }
+
+      var ob = document.getElementById('ob-' + it.id);
+      var obv = ob ? ob.value : '';
+      var det = document.getElementById('det-' + it.id);
+      var detv = det ? det.value : '';
+      var aiiso = document.getElementById('ai-iso-' + it.id);
+      var aiisov = aiiso ? aiiso.textContent : '';
+      var ailg = document.getElementById('ai-lg-' + it.id);
+      var ailgv = ailg ? ailg.textContent : '';
+      var miso = document.getElementById('iso-' + it.id);
+      var misov = miso ? miso.value : '';
+      var photo = photoStore[it.id];
+
+      // Estimate height needed
+      var photoH = photo ? 55 : 0;
+      var obLines = obv ? doc.splitTextToSize(obv, CW-6).length : 0;
+      var detLines = detv ? doc.splitTextToSize(detv, CW-6).length : 0;
+      var neededH = 14 + photoH + (obLines * 4) + (detLines * 4) + 20;
+
+      if (y + neededH > 275) { doc.addPage(); y = 14; }
+
+      // Score colours
+      var scoreColors = { satisfactory: [217,119,6], noncompliant: [220,38,38], negligent: [127,29,29] };
+      var scoreLabels = { satisfactory: 'SATISFACTORY', noncompliant: 'NON-COMPLIANT', negligent: 'NEGLIGENT' };
+      var itemCol = scoreColors[sv] || [150,150,150];
+
+      // Finding card border
+      doc.setDrawColor(itemCol[0],itemCol[1],itemCol[2]);
+      doc.setLineWidth(0.5);
+
+      // Item header bar
+      doc.setFillColor(itemCol[0],itemCol[1],itemCol[2]);
+      doc.rect(M, y, CW, 9, 'F');
+      doc.setTextColor(wh[0],wh[1],wh[2]); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      var iname = doc.splitTextToSize(it.name, CW-40);
+      doc.text(iname[0], M+3, y+6);
+      doc.text(scoreLabels[sv] || sv.toUpperCase(), W-M-3, y+6, { align: 'right' });
+      y += 11;
+
+      // Photo if available
+      if (photo) {
+        try {
+          doc.addImage(photo.dataUrl, 'JPEG', M, y, CW, 52);
+          y += 54;
+        } catch(e) { console.log('Photo embed error:', e); }
+      }
+
+      // Content area background
+      doc.setFillColor(252,252,254);
+      var contentStartY = y;
+
+      // Observation
+      if (obv) {
+        doc.setTextColor(sl[0],sl[1],sl[2]); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+        doc.text('Observation:', M+3, y+4);
+        doc.setTextColor(bk[0],bk[1],bk[2]); doc.setFont('helvetica','normal');
+        var ol = doc.splitTextToSize(obv, CW-6);
+        doc.text(ol, M+3, y+8);
+        y += 8 + ol.length * 4;
+      }
+
+      // Remedial action
+      if (detv) {
+        doc.setTextColor(sl[0],sl[1],sl[2]); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+        doc.text('Remedial Action Required:', M+3, y+4);
+        doc.setTextColor(bk[0],bk[1],bk[2]); doc.setFont('helvetica','normal');
+        var dl = doc.splitTextToSize(detv, CW-6);
+        doc.text(dl, M+3, y+8);
+        y += 8 + dl.length * 4;
+      }
+
+      // Legislation & ISO
+      var isoTxt = misov || aiisov;
+      if (isoTxt && isoTxt.indexOf('enter manually') < 0 && isoTxt !== '') {
+        doc.setFontSize(7); doc.setTextColor(pu[0],pu[1],pu[2]); doc.setFont('helvetica','bold');
+        doc.text('ISO 45001: ' + isoTxt, M+3, y+4);
+        y += 5;
+      }
+      if (ailgv && ailgv !== 'No breach observed' && ailgv !== 'None identified' && ailgv !== '') {
+        doc.setFontSize(7); doc.setTextColor(220,38,38); doc.setFont('helvetica','normal');
+        var ll = doc.splitTextToSize('Legislation: ' + ailgv, CW-6);
+        doc.text(ll, M+3, y+4);
+        y += 4 + ll.length * 4;
+      }
+
+      y += 8;
+      hasFindings = true;
+      doc.setLineWidth(0.2);
+    });
+  });
+
+  if (!hasFindings) {
+    doc.addPage(); y = 20;
+    doc.setTextColor(22,163,74); doc.setFontSize(14); doc.setFont('helvetica','bold');
+    doc.text('No significant findings recorded.', W/2, y+20, { align: 'center' });
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(bk[0],bk[1],bk[2]);
+    doc.text('All inspected items were rated Outstanding or Compliant.', W/2, y+30, { align: 'center' });
+  }
+
+  // -- SIGNATURE PAGE --
+  doc.addPage(); y = 0;
+
+  doc.setFillColor(sl[0],sl[1],sl[2]); doc.rect(0,0,W,14,'F');
+  doc.setFillColor(pu[0],pu[1],pu[2]); doc.rect(0,0,W,3,'F');
+  doc.setTextColor(wh[0],wh[1],wh[2]); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('SIGN OFF', M, 10);
+  y = 22;
+
+  var repName2 = document.getElementById('rep-name');
+  var repTitle2 = document.getElementById('rep-title');
+  var repCompany2 = document.getElementById('rep-company');
+  var halfW = (CW / 2) - 4;
+
+  // Site rep box
+  doc.setFillColor(248,248,252); doc.rect(M, y, halfW, 70, 'F');
+  doc.setDrawColor(200,200,220); doc.rect(M, y, halfW, 70);
+  doc.setTextColor(sl[0],sl[1],sl[2]); doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('SITE REPRESENTATIVE', M+3, y+7);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(bk[0],bk[1],bk[2]);
+  doc.text('Name: ' + (repName2 ? repName2.value : ''), M+3, y+14);
+  doc.text('Title: ' + (repTitle2 ? repTitle2.value : ''), M+3, y+20);
+  doc.text('Company: ' + (repCompany2 ? repCompany2.value : ''), M+3, y+26);
+  doc.text('Date: ' + new Date().toLocaleDateString('en-GB'), M+3, y+32);
+  doc.setFontSize(7); doc.setTextColor(gr[0],gr[1],gr[2]);
+  doc.text('Signature:', M+3, y+39);
+  doc.setTextColor(sl[0],sl[1],sl[2]); doc.setFontSize(7.5);
+  doc.text('"I confirm I was present during this inspection and the findings are an accurate record."', M+3, y+43, { maxWidth: halfW-6 });
+  var repSigC = document.getElementById('rep-sig');
+  if (repSigC && repSigSigned) {
+    try { var rsi = repSigC.toDataURL('image/png'); doc.addImage(rsi, 'PNG', M+3, y+50, halfW-6, 16); } catch(e) {}
+  }
+
+  // Inspector box
+  var inspX = M + halfW + 8;
+  doc.setFillColor(248,248,252); doc.rect(inspX, y, halfW, 70, 'F');
+  doc.setDrawColor(200,200,220); doc.rect(inspX, y, halfW, 70);
+  doc.setTextColor(sl[0],sl[1],sl[2]); doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('INSPECTOR', inspX+3, y+7);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(bk[0],bk[1],bk[2]);
+  doc.text('Name: ' + (data['Inspector'] || ''), inspX+3, y+14);
+  doc.text('Organisation: SafetySphere', inspX+3, y+20);
+  doc.text('Reference: ' + (data['Reference'] || ''), inspX+3, y+26);
+  doc.text('Date: ' + new Date().toLocaleDateString('en-GB'), inspX+3, y+32);
+  doc.setFontSize(7); doc.setTextColor(gr[0],gr[1],gr[2]);
+  doc.text('Signature:', inspX+3, y+39);
+  doc.setTextColor(sl[0],sl[1],sl[2]); doc.setFontSize(7.5);
+  doc.text('"I confirm this inspection was carried out thoroughly and findings are accurate."', inspX+3, y+43, { maxWidth: halfW-6 });
+  var insSigC = document.getElementById('ins-sig');
+  if (insSigC && sigSigned) {
+    try { var isi = insSigC.toDataURL('image/png'); doc.addImage(isi, 'PNG', inspX+3, y+50, halfW-6, 16); } catch(e) {}
+  }
+
+  y += 78;
+
+  // Footer note
+  doc.setFillColor(sl[0],sl[1],sl[2]); doc.rect(M, y, CW, 14, 'F');
+  doc.setTextColor(180,180,220); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+  doc.text('This report is confidential and prepared solely for the addressee. Any reliance on this report by third parties is at their own risk.', M+3, y+5, { maxWidth: CW-6 });
+  doc.text('SafetySphere Health & Safety Management System  |  Report Reference: ' + (data['Reference'] || ''), M+3, y+10);
+
+  // Page footers on all pages
+  var pc = doc.internal.getNumberOfPages();
+  for (var i = 1; i <= pc; i++) {
+    doc.setPage(i);
+    if (i > 1) {
+      doc.setFillColor(sl[0],sl[1],sl[2]); doc.rect(0, 287, W, 10, 'F');
+      doc.setTextColor(180,180,200); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+      doc.text('SafetySphere Inspection Report  |  ' + (data['Site Name'] || '') + '  |  ' + (data['Reference'] || '') + '  |  ' + (data['Timestamp'] || ''), M, 293);
+      doc.text('Page ' + i + ' of ' + pc, W-M, 293, { align: 'right' });
+    }
+  }
+
+  doc.save('INS-' + (data['Site Name'] || 'SITE').replace(/[^a-zA-Z0-9]/g, '-') + '-' + new Date().toISOString().split('T')[0] + '.pdf');
+}
+
+
+function filterSections(query) {
+  var q = query.toLowerCase().trim();
+  var sections = document.querySelectorAll('.scard');
+  var visible = 0;
+  sections.forEach(function(sec) {
+    var name = sec.querySelector('.sname');
+    if (!name) return;
+    var matches = !q || name.textContent.toLowerCase().indexOf(q) > -1;
+    sec.classList.toggle('section-hidden', !matches);
+    if (matches) visible++;
+  });
+  var count = document.getElementById('search-count');
+  if (count) {
+    if (q) {
+      count.textContent = visible + ' of ' + sections.length + ' sections shown';
+    } else {
+      count.textContent = '';
+    }
+  }
+  // Auto-open section if only one result
+  if (visible === 1 && q) {
+    var first = document.querySelector('.scard:not(.section-hidden)');
+    if (first) {
+      var body = first.querySelector('.sbody');
+      var arrow = first.querySelector('.sarrow');
+      var hdr = first.querySelector('.shdr');
+      if (body && !body.classList.contains('open')) {
+        body.classList.add('open');
+        if (arrow) arrow.classList.add('open');
+        if (hdr) hdr.classList.add('open');
+      }
+    }
+  }
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  var el=document.getElementById(id);
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
